@@ -1,35 +1,36 @@
 package com.example.application.views.list;
 
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Paragraph;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import jakarta.annotation.security.PermitAll;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
+@PermitAll
 @PageTitle("list")
-@Route(value = "")
-@RouteAlias(value = "")
+@Route(value = "profile")
+
 public class ListView extends VerticalLayout {
-
+    private Button sayHello;
     public ListView() {
-        setSpacing(false);
 
-        Image img = new Image("images/empty-plant.png", "placeholder plant");
-        img.setWidth("200px");
-        add(img);
+        sayHello = new Button("Say hello to new user");
+        add(sayHello);
+        addLoggedInUser();
 
-        H2 header = new H2("This place intentionally left empty");
-        header.addClassNames(Margin.Top.XLARGE, Margin.Bottom.MEDIUM);
-        add(header);
-        add(new Paragraph("It’s a place where you can grow your own UI 🤗"));
-
-        setSizeFull();
-        setJustifyContentMode(JustifyContentMode.CENTER);
-        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-        getStyle().set("text-align", "center");
     }
+    private void addLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        TextField loggedInUser = new TextField("Logged in as:");
+        loggedInUser.setValue(currentUserName);
+        loggedInUser.setReadOnly(true);
+        loggedInUser.setValue(currentUserName);
+        loggedInUser.setReadOnly(true);
 
+        add(loggedInUser);
+    }
 }
