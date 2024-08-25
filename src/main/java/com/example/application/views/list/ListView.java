@@ -11,7 +11,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 @PermitAll
 @PageTitle("list")
-@Route(value = "profile")
+@Route(value = "test")
 
 public class ListView extends VerticalLayout {
     private Button sayHello;
