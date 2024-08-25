@@ -13,6 +13,7 @@ import java.util.List;
 //@CssImport("./styles/styles.css") // Ensure the path is correct
 public class Friendslide extends VerticalLayout {
     private UserDetailsServiceImpl databaseService;
+    int flag = 0;
     public Friendslide(UserDetailsServiceImpl databaseService) {
         HorizontalLayout friendsContainer = new HorizontalLayout();
         friendsContainer.setId("friends-container");
@@ -21,7 +22,22 @@ public class Friendslide extends VerticalLayout {
 
         this.databaseService = databaseService;
 
-        List<String> names = databaseService.getNames();
+        List<UserForm> allusers = this.databaseService.findAllUsers();
+
+        for (int i = 0; i < allusers.size(); i++) {
+            if (allusers.get(i).getUsername().equals("user1")) {
+                flag = 1;
+                break;
+            }
+
+        }
+
+        if (flag == 0) {
+            this.databaseService.createTestUsers();
+        }
+
+
+        List<String> names = this.databaseService.getNames();
 
         System.out.println(names);
 

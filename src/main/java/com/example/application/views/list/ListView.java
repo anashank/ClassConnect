@@ -19,18 +19,18 @@ public class ListView extends VerticalLayout {
 
         sayHello = new Button("Say hello to new user");
         add(sayHello);
-        addLoggedInUser();
+       // addLoggedInUser();
 
     }
-    private void addLoggedInUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = authentication.getName();
-        TextField loggedInUser = new TextField("Logged in as:");
-        loggedInUser.setValue(currentUserName);
-        loggedInUser.setReadOnly(true);
-        loggedInUser.setValue(currentUserName);
-        loggedInUser.setReadOnly(true);
-
-        add(loggedInUser);
-    }
+//    private void addLoggedInUser() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String currentUserName = authentication.getName();
+//        TextField loggedInUser = new TextField("Logged in as:");
+//        loggedInUser.setValue(currentUserName);
+//        loggedInUser.setReadOnly(true);
+//        loggedInUser.setValue(currentUserName);
+//        loggedInUser.setReadOnly(true);
+//
+//        add(loggedInUser);
+//    }
 }

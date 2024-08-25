@@ -12,9 +12,12 @@ import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @PermitAll
 // Empty '@Route("") means it's the default class that gets loaded
@@ -31,8 +34,11 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         DrawerToggle toggle = new DrawerToggle();
 
         H1 title = new H1("Dashboard");
+        TextField luser = addLoggedInUser();
         title.getStyle().set("font-size", "var(--lumo-font-size-l)")
                 .set("margin", "0");
+        //move the luser field to the right corner of the layout
+        luser.getStyle().set("margin-left", "auto");
 
         SideNav nav = getSideNav();
 
@@ -40,11 +46,22 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         scroller.setClassName(LumoUtility.Padding.SMALL);
 
         addToDrawer(scroller);
-        addToNavbar(toggle, title);
+        addToNavbar(toggle, title, luser);
 
         setPrimarySection(Section.DRAWER);
-
     }
+    private TextField addLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        TextField loggedInUser = new TextField("Logged in as:");
+        loggedInUser.setValue(currentUserName);
+        loggedInUser.setReadOnly(true);
+        loggedInUser.setValue(currentUserName);
+        loggedInUser.setReadOnly(true);
+        return(loggedInUser);
+        
+    }
+
     // end::snippet[]
 
     private SideNav getSideNav() {
@@ -103,6 +120,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         content.add(topRow, profileButton, assignmentsButton, bottomRow);
         setContent(content);
     }
+    
     // tag::snippet[]
 }
 // end::snippet[]

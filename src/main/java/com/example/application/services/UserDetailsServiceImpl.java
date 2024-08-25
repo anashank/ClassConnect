@@ -49,6 +49,18 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         return userRepository.findAll();
     }
 
+    // Define function that creates test users to add to the users table
+    public void createTestUsers() {
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+
+            Statement stmt = conn.createStatement()) {
+            //add variable to stmt execute function to add an encoded password
+            stmt.execute("INSERT INTO users (username, password, email) VALUES ('user1', '"+passwordEncoder.encode("password1")+"','email1')");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void saveUserDetails(UserForm user){
         if(user == null){
             System.err.println("User is null");
@@ -56,6 +68,7 @@ public class UserDetailsServiceImpl implements UserDetailsService{
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+
     }
 
     @Override
