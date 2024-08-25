@@ -1,0 +1,13 @@
+.friend-item {
+    background-color: lightblue;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin: 15px;
+    border-radius: 5px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.friend-item:hover {
+    transform: scale(4.05);
+}

@@ -8,6 +8,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -16,12 +21,28 @@ public class UserDetailsServiceImpl implements UserDetailsService{
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private static final String DB_URL = "jdbc:sqlite:db/vaadin_app.db";
 
     @Autowired
     public UserDetailsServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public List<String> getNames() {
+        List<String> names = new ArrayList<>();
+        try (Connection conn = DriverManager.getConnection(DB_URL);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT username FROM users")) {
+
+            while (rs.next()) {
+                names.add(rs.getString("username"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return names;
     }
 
     public List<UserForm> findAllUsers(){
