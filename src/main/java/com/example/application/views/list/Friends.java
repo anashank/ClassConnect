@@ -23,6 +23,7 @@ public class Friends extends Profile{
     public boolean recieveFriendRequest(){
         return false;
     }//test :D
+    //test part two :O
 
 
 }
