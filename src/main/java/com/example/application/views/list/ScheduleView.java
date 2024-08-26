@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@PermitAll
 @Route("schedule")
 public class ScheduleView extends VerticalLayout {
 
