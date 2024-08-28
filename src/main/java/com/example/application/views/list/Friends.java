@@ -8,7 +8,8 @@ public class Friends extends Profile{
 
     }
 
-    public boolean recFriends(){//
+    public boolean recFriends(){
+
         return false;
     }
     public boolean addFriend(){
