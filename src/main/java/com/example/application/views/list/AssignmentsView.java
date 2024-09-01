@@ -36,6 +36,7 @@ public class AssignmentsView extends VerticalLayout {
         ComboBox<String> subjectComboBox = new ComboBox<>("Subject Name");
         subjectComboBox.setItems("Calculus", "English 2", "Physics C");
 
+
         DatePicker datePicker = new DatePicker("Date Due");
         NumberField pointsField = new NumberField("Points");
 
