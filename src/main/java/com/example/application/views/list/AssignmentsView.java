@@ -9,7 +9,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import jakarta.annotation.security.PermitAll;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,7 +34,6 @@ public class AssignmentsView extends VerticalLayout {
 
         ComboBox<String> subjectComboBox = new ComboBox<>("Subject Name");
         subjectComboBox.setItems("Calculus", "English 2", "Physics C");
-
 
         DatePicker datePicker = new DatePicker("Date Due");
         NumberField pointsField = new NumberField("Points");
