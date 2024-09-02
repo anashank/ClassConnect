@@ -53,6 +53,8 @@ public class ProfileView extends VerticalLayout {
                 saveButton
         );
 
+        contentLayout.addClassName("profile-layout");
+
         add(contentLayout);
     }
 
