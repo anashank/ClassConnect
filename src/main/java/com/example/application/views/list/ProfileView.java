@@ -53,8 +53,6 @@ public class ProfileView extends VerticalLayout {
                 saveButton
         );
 
-        // TEST
-
         add(contentLayout);
     }
 
