@@ -35,6 +35,7 @@ public class FriendsView extends VerticalLayout {
         TextField school = new TextField("School");
         Friendslide test = new Friendslide(databaseService);
         ProfilePictureView test2 = new ProfilePictureView();
+        Profile profile = new Profile();
         //        this.databaseService = new UserDetailsServiceImpl();
 
         Firstname.setReadOnly(true);
@@ -79,11 +80,11 @@ public class FriendsView extends VerticalLayout {
 
         done.addClickListener(event -> {//adds value to variables when clicked
             if (!schedule.isEmpty()) {
-                firstName = Firstname.getValue();
-                lastName = Lastname.getValue();
-                email = Email.getValue();
-                currentGrade = grade.getValue();
-                School = school.getValue();
+                profile.setFirstName(Firstname.getValue());
+                profile.setLastName(Lastname.getValue());
+                profile.setEmail(Email.getValue());
+                profile.setCurrentGrade(grade.getValue());
+                profile.setSchool(school.getValue());
                 add(edit);
                 remove(addButton, removeButton, cancel, done);
 

@@ -2,12 +2,13 @@ package com.example.application.views.list;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Profile {
+public class Profile extends UserForm{
     String firstName, lastName,grade, email, password, school;
     int age;
     LocalDate birthday;
     LocalDate currentDate = LocalDate.now();
     Schedule schedule = new Schedule();
+    ArrayList <Friends> friends;
 
    public Profile(){//default
         firstName = null;
@@ -67,6 +68,14 @@ public class Profile {
     }
     public void setPassword(String password){
        this.password = password;
+    }
+
+    public void setCurrentGrade(String grade){
+       this.grade = grade;
+    }
+
+    public String getCurrentGrade(){
+       return grade;
     }
 
     public String getSchool(){
