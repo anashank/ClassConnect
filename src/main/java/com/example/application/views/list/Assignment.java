@@ -1,9 +1,15 @@
 package com.example.application.views.list;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
+
 import java.time.LocalDate;
 
 
 public class Assignment {
+
+
 
     private String assignmentName;
     private String subjectName;
@@ -11,6 +17,8 @@ public class Assignment {
     private int points;
 
     public Assignment(String assignmentName, String subjectName, LocalDate dateDue, int points) {
+
+
         this.assignmentName = assignmentName;
         this.subjectName = subjectName;
         this.dateDue = dateDue;
@@ -47,4 +55,6 @@ public class Assignment {
     public void setPoints(int points) {
         this.points = points;
     }
+
+
 }

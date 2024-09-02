@@ -14,6 +14,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.Authentication;
@@ -59,7 +60,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         loggedInUser.setValue(currentUserName);
         loggedInUser.setReadOnly(true);
         return(loggedInUser);
-        
+
     }
 
     // end::snippet[]
