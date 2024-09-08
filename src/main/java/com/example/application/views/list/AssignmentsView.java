@@ -8,6 +8,10 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
@@ -19,6 +23,8 @@ import java.util.List;
 public class AssignmentsView extends VerticalLayout {
 
     public AssignmentsView() {
+
+
 
         List<Assignment> assignments = new ArrayList<>();
         assignments.add(new Assignment("Math", "Calculus", LocalDate.of(2024, 7, 22), 10));
@@ -75,3 +81,4 @@ public class AssignmentsView extends VerticalLayout {
         pointsField.clear();
     }
 }
+

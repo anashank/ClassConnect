@@ -14,6 +14,7 @@ import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.Authentication;
@@ -35,10 +36,12 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
 
         H1 title = new H1("Dashboard");
         TextField luser = addLoggedInUser();
+        Button logoutButton = addLogoutButton();
         title.getStyle().set("font-size", "var(--lumo-font-size-l)")
                 .set("margin", "0");
         //move the luser field to the right corner of the layout
         luser.getStyle().set("margin-left", "auto");
+        logoutButton.getStyle().set("margin-left", "auto");
 
         SideNav nav = getSideNav();
 
@@ -46,7 +49,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         scroller.setClassName(LumoUtility.Padding.SMALL);
 
         addToDrawer(scroller);
-        addToNavbar(toggle, title, luser);
+        addToNavbar(toggle, title, luser, logoutButton);
 
         setPrimarySection(Section.DRAWER);
     }
@@ -59,7 +62,18 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         loggedInUser.setValue(currentUserName);
         loggedInUser.setReadOnly(true);
         return(loggedInUser);
-        
+
+    }
+
+
+    private Button addLogoutButton(){
+        Button logoutButton = new Button("Log Out", event -> {
+            // Invalidate the session to log out the user
+            VaadinSession.getCurrent().getSession().invalidate();
+            // Redirect to login page
+            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+        });
+        return(logoutButton);
     }
 
     // end::snippet[]

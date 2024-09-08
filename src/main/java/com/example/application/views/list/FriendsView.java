@@ -1,17 +1,25 @@
 package com.example.application.views.list;
 
 import com.example.application.services.UserDetailsServiceImpl;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
 
 import java.util.ArrayList;
@@ -19,7 +27,16 @@ import java.util.List;
 
 @PermitAll
 @Route("friends")
-public class FriendsView extends VerticalLayout {
+public class FriendsView extends AppLayout {
+    DrawerToggle toggle = new DrawerToggle();
+
+    SideNav nav = getSideNav();
+
+    Scroller scroller = new Scroller(nav);
+        scroller.setClassName(LumoUtility.Padding.SMALL);
+
+    addToDrawer(scroller);
+    addToNavbar(toggle);
     //might make a page dedicated to just global variables but will keep them here for now
     String firstName, lastName, currentGrade, email, School;
     Grid<Schedule> grid = new Grid<>(Schedule.class);
@@ -123,7 +140,28 @@ public class FriendsView extends VerticalLayout {
             Notification.show("CLEARED");//Just using this to see if it clears everything
         });
 
-        add(title, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
+        add(title,toggle, nav, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
     }
+    private SideNav getSideNav() {
+        SideNav nav = new SideNav();
+        nav.addItem(new SideNavItem("Dashboard", "/dashboard",
+                        VaadinIcon.DASHBOARD.create()),
+                new SideNavItem("Profile", "/profile",
+                        VaadinIcon.USER.create()),
+                new SideNavItem("Assignments", "/assignments",
+                        VaadinIcon.LIST.create()),
+                new SideNavItem("Subjects", "/subjects",
+                        VaadinIcon.RECORDS.create()),
+                new SideNavItem("Schedule", "/schedule",
+                        VaadinIcon.CALENDAR.create()),
+                new SideNavItem("Location", "/location",
+                        VaadinIcon.LIST.create()),
+                new SideNavItem("Friends", "/friends",
+                        VaadinIcon.USER_HEART.create()),
+                new SideNavItem("Messages", "/messages",
+                        VaadinIcon.MAILBOX.create()));
+        return nav;
+    }
+
 
 }
