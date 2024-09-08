@@ -9,25 +9,54 @@ public class Friends {
     boolean friends;
     UserDetailsServiceImpl databaseService;
     List<UserForm> allusers;
-    List<Friends> recondFriend;
+    List<UserForm> friendList;
+    boolean recondFriend;
 
     public Friends(UserDetailsServiceImpl databaseService) {
         friends = false;
+        recondFriend = false;
         this.databaseService = databaseService;
         allusers = this.databaseService.findAllUsers();
-        recondFriend = new ArrayList<>();
+        friendList = new ArrayList<UserForm>();
     }
 
     public Friends(boolean friends, UserDetailsServiceImpl databaseService) {
         this.friends = friends;
         this.databaseService = databaseService;
         allusers = this.databaseService.findAllUsers();
-        recondFriend = new ArrayList<>();
+        recondFriend = false;
+
     }
 
     public boolean recFriends(UserForm currentUser, UserForm compareUser){
+        int score = 0;
+        boolean classCompare = currentUser.getProfile().getSchedule().getClassName().equals(compareUser.getProfile().getSchedule().getClassName());
+        boolean teacherCompare = currentUser.getProfile().getSchedule().getTeacherName().equals(compareUser.getProfile().getSchedule().getTeacherName());
+        boolean periodCompare = currentUser.getProfile().getSchedule().getPeriod() == compareUser.getProfile().getSchedule().getPeriod();
+        boolean schoolCompare = currentUser.getProfile().getSchool().equals(compareUser.getProfile().getSchool());
 
-
+        if(classCompare && teacherCompare && periodCompare && schoolCompare){
+            score += 40;
+        }
+        else if(classCompare && teacherCompare && schoolCompare){
+            score += 30;
+        }
+        else if(classCompare && periodCompare && schoolCompare){
+            score +=20;
+        }
+        else if(classCompare && schoolCompare){
+            score += 10;
+        }
+        else if(classCompare){
+            score +=5;
+        }
+        else if(schoolCompare){
+            score += 2;
+        }
+        else{
+            score +=0;
+        }
+        return score > 0;
     }
 
 //    public List<Friends> recFriends() {
@@ -64,13 +93,19 @@ public class Friends {
 //        return recondFriend;
 ////    }
 
-    public boolean addFriend() {
-        friends = true;
+    public boolean addFriend(UserForm wee) {
+        if(!friends) {
+            friendList.add(wee);
+            friends = true;
+        }
         return friends;
     }
 
-    public boolean removeFriend() {
-        friends = false;
+    public boolean removeFriend(UserForm wee) {
+        if(friends){
+            friendList.remove(wee);
+            friends = false;
+        }
         return friends;
     }
 

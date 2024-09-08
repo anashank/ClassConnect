@@ -70,6 +70,7 @@ public class ProfileView extends VerticalLayout {
             school.setReadOnly(false);
             grade.setReadOnly(false);
             example.editGrid();
+            test2.addUpload();
 
             add(addButton, removeButton, cancel, done);
             remove(edit);
@@ -83,6 +84,7 @@ public class ProfileView extends VerticalLayout {
                 profile.setEmail(Email.getValue());
                 profile.setCurrentGrade(grade.getValue());
                 profile.setSchool(school.getValue());
+                test2.removeUpload();
                 add(edit);
                 remove(addButton, removeButton, cancel, done);
 
@@ -108,6 +110,7 @@ public class ProfileView extends VerticalLayout {
             grade.clear();
             school.clear();
             example.cancelGrid();
+            test2.removeUpload();
             add(edit);
             remove(addButton, removeButton, cancel, done);
 

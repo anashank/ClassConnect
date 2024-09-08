@@ -26,6 +26,8 @@ public class FriendsView extends VerticalLayout {
     TextField filterText = new TextField();
     public List<Schedule> schedule = new ArrayList<>();
     private UserDetailsServiceImpl databaseService;
+    UserForm userform = new UserForm();
+    Profile profile = new Profile();
 
     public FriendsView(UserDetailsServiceImpl databaseService) {
         H2 title = new H2("User Profile");
@@ -33,9 +35,9 @@ public class FriendsView extends VerticalLayout {
         TextField Lastname = new TextField("Last Name");
         EmailField Email = new EmailField("Email");
         TextField school = new TextField("School");
+        TextField username = new TextField("Username");
         Friendslide test = new Friendslide(databaseService);
         ProfilePictureView test2 = new ProfilePictureView();
-        Profile profile = new Profile();
         //        this.databaseService = new UserDetailsServiceImpl();
 
         Firstname.setReadOnly(true);
@@ -72,6 +74,7 @@ public class FriendsView extends VerticalLayout {
             school.setReadOnly(false);
             grade.setReadOnly(false);
             example.editGrid();
+            test2.addUpload();
 
             add(addButton, removeButton, cancel, done);
             remove(edit);
@@ -85,6 +88,7 @@ public class FriendsView extends VerticalLayout {
                 profile.setEmail(Email.getValue());
                 profile.setCurrentGrade(grade.getValue());
                 profile.setSchool(school.getValue());
+                test2.removeUpload();
                 add(edit);
                 remove(addButton, removeButton, cancel, done);
 
@@ -110,6 +114,7 @@ public class FriendsView extends VerticalLayout {
             grade.clear();
             school.clear();
             example.cancelGrid();
+            test2.removeUpload();
             add(edit);
             remove(addButton, removeButton, cancel, done);
 
@@ -124,7 +129,7 @@ public class FriendsView extends VerticalLayout {
             Notification.show("CLEARED");//Just using this to see if it clears everything
         });
 
-        add(title, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
+        add(title, test2, username, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
     }
 
 }

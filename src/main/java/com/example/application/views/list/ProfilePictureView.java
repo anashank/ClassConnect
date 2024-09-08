@@ -25,7 +25,7 @@ public class ProfilePictureView extends VerticalLayout {
         upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
 
         // Set up a default image (local or from a URL)
-        String defaultImageUrl = "https://www.imghippo.com/i/BpRbs1724024823.png"; // Replace with your default image URL
+        String defaultImageUrl = "https://placekitten.com/200/300"; // Replace with your default image URL
         profilePicture = new Image(defaultImageUrl, "Default Profile Picture");
 
         // Set the size of the profile picture

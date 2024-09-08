@@ -3,11 +3,15 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
 @Table(name = "users")
 public class UserForm implements UserDetails{
+    Profile profile;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -80,4 +84,14 @@ public class UserForm implements UserDetails{
     public boolean isEnabled() {
         return true;
     }
+
+    public Profile getProfile(){
+        return profile;
+    }
+
+    public void setProfile(Profile profile){
+        this.profile = profile;
+    }
+
+
 }
