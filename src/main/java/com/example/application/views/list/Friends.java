@@ -11,6 +11,7 @@ public class Friends {
     List<UserForm> allusers;
     List<UserForm> friendList;
     boolean recondFriend;
+    int score;
 
     public Friends(UserDetailsServiceImpl databaseService) {
         friends = false;
@@ -18,6 +19,7 @@ public class Friends {
         this.databaseService = databaseService;
         allusers = this.databaseService.findAllUsers();
         friendList = new ArrayList<UserForm>();
+
     }
 
     public Friends(boolean friends, UserDetailsServiceImpl databaseService) {
@@ -29,7 +31,12 @@ public class Friends {
     }
 
     public boolean recFriends(UserForm currentUser, UserForm compareUser){
-        int score = 0;
+        for(int x = 0; x<friendList.size();x++) {
+            if (friendList.get(x).equals(compareUser)) {
+                return false;
+            }
+        }
+        score = 0;
         boolean classCompare = currentUser.getProfile().getSchedule().getClassName().equals(compareUser.getProfile().getSchedule().getClassName());
         boolean teacherCompare = currentUser.getProfile().getSchedule().getTeacherName().equals(compareUser.getProfile().getSchedule().getTeacherName());
         boolean periodCompare = currentUser.getProfile().getSchedule().getPeriod() == compareUser.getProfile().getSchedule().getPeriod();
@@ -94,26 +101,25 @@ public class Friends {
 ////    }
 
     public boolean addFriend(UserForm wee) {
-        if(!friends) {
             friendList.add(wee);
             friends = true;
-        }
-        return friends;
+            return true;
     }
 
-    public boolean removeFriend(UserForm wee) {
-        if(friends){
+    public boolean removeFriend(Friends wee) {
             friendList.remove(wee);
             friends = false;
-        }
-        return friends;
+            return true;
     }
 
-    public boolean sendFriendRequest() {
+    public boolean sendFriendRequest(UserForm user) {
+
         return false;
     }
 
     public boolean receiveFriendRequest() {
+        
         return false;
     }
+
 }
