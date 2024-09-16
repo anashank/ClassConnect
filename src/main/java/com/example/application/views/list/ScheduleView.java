@@ -1,11 +1,22 @@
 package com.example.application.views.list;
 
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.vaadin.stefan.fullcalendar.Entry;
 import org.vaadin.stefan.fullcalendar.FullCalendar;
 import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
@@ -17,11 +28,61 @@ import java.time.LocalTime;
 
 @PermitAll
 @Route("schedule")
-public class ScheduleView extends VerticalLayout {
+public class ScheduleView extends AppLayout {
+    private VerticalLayout contentLayout = new VerticalLayout();
 
     public ScheduleView() {
+        DrawerToggle toggle = new DrawerToggle();
+        H1 title = new H1("Schedule");
+        TextField loggedInUser = addLoggedInUser();
+        Button logoutButton = addLogoutButton();
+        loggedInUser.getStyle().set("margin-left", "auto");
+        logoutButton.getStyle().set("margin-left", "auto");
 
-        // Creating the input fields
+        SideNav nav = getSideNav();
+        Scroller scroller = new Scroller(nav);
+        scroller.setClassName(LumoUtility.Padding.SMALL);
+
+        // Add to layout
+        addToDrawer(scroller);
+        addToNavbar(toggle, title, loggedInUser, logoutButton);
+
+        createSchedConnect();
+
+        setContent(contentLayout);
+
+    }
+    private TextField addLoggedInUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserName = authentication.getName();
+        TextField loggedInUser = new TextField("Logged in as:");
+        loggedInUser.setValue(currentUserName);
+        loggedInUser.setReadOnly(true);
+        return loggedInUser;
+    }
+    private Button addLogoutButton() {
+        Button logoutButton = new Button("Log Out", event -> {
+            VaadinSession.getCurrent().getSession().invalidate();
+            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+        });
+        return logoutButton;
+    }
+
+    // Navigation drawer items
+    private SideNav getSideNav() {
+        SideNav nav = new SideNav();
+        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()));
+        nav.addItem(new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()));
+        nav.addItem(new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()));
+        nav.addItem(new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()));
+        nav.addItem(new SideNavItem("Schedule", "/schedule", VaadinIcon.CALENDAR.create()));
+        nav.addItem(new SideNavItem("Location", "/location", VaadinIcon.MAP_MARKER.create()));
+        nav.addItem(new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()));
+        nav.addItem(new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
+        return nav;
+    }
+
+    private void createSchedConnect() {
         DatePicker datePicker = new DatePicker("Select Date");
         TextField timeField = new TextField("Select Time (HH:MM)");
         TextField eventNameField = new TextField("Event Name");
@@ -89,6 +150,9 @@ public class ScheduleView extends VerticalLayout {
         calendarContainer.addClassName("calendar-container");
 
 
-        add(calendarContainer, datePicker, timeField, eventNameField, submitButton);
+        contentLayout.add(calendarContainer, datePicker, timeField, eventNameField, submitButton);
     }
-}
+    }
+
+
+    // Creating the input fields
