@@ -1,17 +1,25 @@
 package com.example.application.views.list;
 
 import com.example.application.services.UserDetailsServiceImpl;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+
 
 public class Friends {
+
     boolean friends;
     UserDetailsServiceImpl databaseService;
     List<UserForm> allusers;
     List<UserForm> friendList;
     boolean recondFriend;
     int score;
+    HashMap<UserForm, Integer> similarity;
+    HashMap<UserForm, Boolean> complete;
 
     public Friends(UserDetailsServiceImpl databaseService) {
         friends = false;
@@ -19,6 +27,15 @@ public class Friends {
         this.databaseService = databaseService;
         allusers = this.databaseService.findAllUsers();
         friendList = new ArrayList<UserForm>();
+        similarity = new HashMap<UserForm, Integer>();
+        complete = new HashMap<UserForm,Boolean>();
+
+        for(int x = 0; x<allusers.size();x++){
+            similarity.put(allusers.get(x), 0);
+            complete.put(allusers.get(x),false);
+        }
+
+
 
     }
 
@@ -44,6 +61,7 @@ public class Friends {
 
         if(classCompare && teacherCompare && periodCompare && schoolCompare){
             score += 40;
+
         }
         else if(classCompare && teacherCompare && schoolCompare){
             score += 30;
@@ -63,62 +81,44 @@ public class Friends {
         else{
             score +=0;
         }
+        similarity.put(compareUser,score);
         return score > 0;
     }
 
-//    public List<Friends> recFriends() {
-//        for (int x = 0; x < allusers.size(); x++) {
-//            double [] score = new double [allusers.size()];
-//            for (int y = 0; y < allusers.size(); y++) {
-//                    boolean sameClass = allusers.get(y).getSchedule().getClassName().equals(allusers.get(x).getSchedule().getClassName());
-//                    boolean sameTeacher = allusers.get(y).getSchedule().getTeacherName().equals(allusers.get(x).getSchedule().getTeacherName());
-//                    boolean samePeriod = allusers.get(y).getSchedule().getPeriod().equals(allusers.get(x).getSchedule().getPeriod());
-//                    boolean sameSchool = allusers.get(y).getSchool().equals(allusers.get(x).getSchool());
-//
-//                    if (sameClass && sameTeacher && samePeriod && sameSchool) {
-//                        score[y]+= 1;
-//
-//                    } else if (sameClass && sameTeacher && sameSchool) {
-//                        score[y]+= 0.83;
-//                    }
-//                    else if(sameClass && samePeriod && sameSchool){
-//                        score[y]+= 0.66;
-//                    }
-//                    else if(sameClass && sameSchool){
-//                        score[y]+= 0.49;
-//                    }
-//                    else if(sameClass){
-//                        score[y]+= 0.32;
-//
-//                    }
-//                    else if(sameSchool) {
-//                        score[y] += 0.15;
-//                    }
-//            }
-//        }
-//
-//        return recondFriend;
-////    }
-
     public boolean addFriend(UserForm wee) {
             friendList.add(wee);
-            friends = true;
+            complete.put(wee,true);
             return true;
     }
 
-    public boolean removeFriend(Friends wee) {
-            friendList.remove(wee);
-            friends = false;
-            return true;
+    public boolean removeFriend(UserForm wee) {
+        friendList.remove(wee);
+        complete.put(wee,false);
+        return true;
     }
 
-    public boolean sendFriendRequest(UserForm user) {
+    public boolean sendFriendRequestNotificaiton() {
 
-        return false;
-    }
+        Button actionButton = new Button("@_________ sent you a friend request!", event -> {
+            Notification.show("Friend Request received!");
+        });
 
-    public boolean receiveFriendRequest() {
-        
+        // Create the Notification with custom content
+        Notification notification = new Notification();
+
+        // Create a layout to hold content inside the notification
+        HorizontalLayout notificationLayout = new HorizontalLayout();
+        notificationLayout.add(actionButton); // Add the button to the notification
+
+        // Add the layout to the notification
+        notification.add(notificationLayout);
+
+        // Set notification properties (optional)
+        notification.setPosition(Notification.Position.MIDDLE);
+        notification.setDuration(10000); // Duration (e.g., 10 seconds)
+
+        // Open the notification
+        notification.open();
         return false;
     }
 

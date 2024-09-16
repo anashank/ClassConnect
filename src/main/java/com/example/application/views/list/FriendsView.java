@@ -14,6 +14,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,13 +30,14 @@ public class FriendsView extends VerticalLayout {
     UserForm userform = new UserForm();
     Profile profile = new Profile();
 
+
     public FriendsView(UserDetailsServiceImpl databaseService) {
         H2 title = new H2("User Profile");
         TextField Firstname = new TextField("First Name");
         TextField Lastname = new TextField("Last Name");
         EmailField Email = new EmailField("Email");
         TextField school = new TextField("School");
-        TextField username = new TextField("Username");
+        //Label username = new Label(userform.getUsername());
         Friendslide test = new Friendslide(databaseService);
         ProfilePictureView test2 = new ProfilePictureView();
         //        this.databaseService = new UserDetailsServiceImpl();
@@ -128,8 +130,9 @@ public class FriendsView extends VerticalLayout {
 
             Notification.show("CLEARED");//Just using this to see if it clears everything
         });
+        //tost.sendFriendRequestNotificaiton();
 
-        add(title, test2, username, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
+        add(title, test2, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
     }
 
 }
