@@ -1,5 +1,6 @@
 package com.example.application.views.list;
 
+import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -21,10 +22,11 @@ import java.util.List;
 
 @PermitAll
 @Route("assignments")
-public class AssignmentsView extends VerticalLayout {
+public class AssignmentsView extends AppLayout {
+    private VerticalLayout contentLayout = new VerticalLayout();
 
     public AssignmentsView() {
-
+        
 
 
         List<Assignment> assignments = new ArrayList<>();
