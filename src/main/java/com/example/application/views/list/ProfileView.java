@@ -110,6 +110,20 @@ public class ProfileView extends AppLayout {
         nav.addItem(new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()));
         nav.addItem(new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
         return nav;
+        ProfilePictureView profile_picture_view = new ProfilePictureView();
+
+        VerticalLayout contentLayout = new VerticalLayout (
+                profile_picture_view,
+                firstNameField,
+                lastNameField,
+                emailField,
+                schoolField,
+                saveButton
+        );
+
+        contentLayout.addClassName("profile-layout");
+
+        add(contentLayout);
     }
 
     private void saveProfile() {
