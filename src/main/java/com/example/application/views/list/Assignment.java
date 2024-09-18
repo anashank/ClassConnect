@@ -1,5 +1,4 @@
 package com.example.application.views.list;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,7 +8,6 @@ import java.time.LocalDate;
 
 @Entity
 public class Assignment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,6 +21,8 @@ public class Assignment {
     }
 
     public Assignment(String assignmentName, String subjectName, LocalDate dateDue, int points) {
+
+
         this.assignmentName = assignmentName;
         this.subjectName = subjectName;
         this.dateDue = dateDue;
@@ -59,4 +59,6 @@ public class Assignment {
     public void setPoints(int points) {
         this.points = points;
     }
+
+
 }
