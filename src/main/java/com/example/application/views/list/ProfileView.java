@@ -9,7 +9,7 @@ import jakarta.annotation.security.PermitAll;
 import java.time.LocalDate;
 
 @PermitAll
-@Route("friends")
+@Route("profile")
 public class ProfileView extends VerticalLayout {
 
     private TextField firstNameField;

@@ -9,13 +9,10 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -24,15 +21,6 @@ import java.util.List;
 public class AssignmentsView extends VerticalLayout {
 
     private final AssignmentRepository assignmentRepository; // Inject repository
-    public AssignmentsView() {
-
-
-
-        List<Assignment> assignments = new ArrayList<>();
-        assignments.add(new Assignment("Math", "Calculus", LocalDate.of(2024, 7, 22), 10));
-        assignments.add(new Assignment("English", "English 2", LocalDate.of(2024, 7, 22), 20));
-        assignments.add(new Assignment("Physics", "Physics C", LocalDate.of(2024, 7, 22), 30));
-
 
     @Autowired
     public AssignmentsView(AssignmentRepository assignmentRepository) {
