@@ -17,6 +17,11 @@
     height: 100vh;
 }
 
+.profile-content {
+    display: flex;
+    justify-content: center;
+}
+
 .huge-middle-button {
     height: 21vh;
     font-size: 2.5vw;

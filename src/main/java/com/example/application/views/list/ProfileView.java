@@ -42,7 +42,20 @@ public class ProfileView extends VerticalLayout {
         saveButton = new Button("Save");
         saveButton.addClickListener(e -> saveProfile());
 
-        add(firstNameField, lastNameField, emailField, schoolField, saveButton);
+        ProfilePictureView profile_picture_view = new ProfilePictureView();
+
+        VerticalLayout contentLayout = new VerticalLayout (
+                profile_picture_view,
+                firstNameField,
+                lastNameField,
+                emailField,
+                schoolField,
+                saveButton
+        );
+
+        contentLayout.addClassName("profile-layout");
+
+        add(contentLayout);
     }
 
     private void saveProfile() {
