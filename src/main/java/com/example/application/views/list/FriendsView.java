@@ -44,7 +44,7 @@ public class FriendsView extends AppLayout {
 
         // Create Navbar and Drawer
         DrawerToggle toggle = new DrawerToggle();
-        H1 title = new H1("Friends");
+        H1 title = new H1("Profile");
         TextField loggedInUser = addLoggedInUser();
         Button logoutButton = addLogoutButton();
         loggedInUser.getStyle().set("margin-left", "auto");
