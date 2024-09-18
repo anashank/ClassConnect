@@ -20,7 +20,7 @@ import java.net.http.HttpResponse;
 @PermitAll
 @Route("location")
 public class LocationView extends VerticalLayout {
-
+//comment
     private Span latitudeLabel = new Span();
     private Span longitudeLabel = new Span();
     private Span locationLabel = new Span();
