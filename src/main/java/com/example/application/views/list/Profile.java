@@ -1,15 +1,16 @@
 package com.example.application.views.list;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
-public class Profile {
-    String firstName, lastName, grade, email, password, school;
+public class Profile extends UserForm{
+    String firstName, lastName,grade, email, password, school;
     int age;
     LocalDate birthday;
     LocalDate currentDate = LocalDate.now();
     Schedule schedule = new Schedule();
+    ArrayList <Friends> friends;
 
-    // Default constructor
-    public Profile() {
+    public Profile(){//default
         firstName = null;
         lastName = null;
         grade = null;
@@ -17,83 +18,83 @@ public class Profile {
         password = null;
         school = null;
         age = 0;
-        birthday = LocalDate.of(2000, 1, 1); // Default birthday to avoid null
+        birthday = null;
     }
-
-    // Parameterized constructor
-    public Profile(String firstName, String lastName, String grade, String email, String password, String school, LocalDate birthday) {
+    public Profile(String firstName, String lastName, String grade, String email, String password, String school, LocalDate birthday){//will put more stuff in later
         this.firstName = firstName;
         this.lastName = lastName;
         this.grade = grade;
         this.email = email;
         this.password = password;
         this.school = school;
-        this.birthday = birthday;
         this.age = calculateAge();
+        this.birthday = birthday;
     }
-
-    // Method to calculate age based on birthday and current date
-    public int calculateAge() {
-        if (birthday == null) {
-            return 0; // Handle case where birthday is not set
-        }
-
-        int calculatedAge = currentDate.getYear() - birthday.getYear();
+    //making up methods first
+    public int calculateAge(){
+        age = currentDate.getYear() - birthday.getYear();
         if (currentDate.getDayOfYear() < birthday.getDayOfYear()) {
-            calculatedAge -= 1;
+            age = age-1;
         }
-        return calculatedAge;
+        return age;
     }
-
-    // Getter and setter methods
-    public int getAge() {
+    public int getAge(){
         return age;
     }
 
-    public String getFirstName() {
+    public String getFirstName(){
         return firstName;
     }
-    public void setFirstName(String firstName) {
+    public void setFirstName(String firstName){
         this.firstName = firstName;
     }
 
-    public String getLastName() {
+    public String getLastName(){
         return lastName;
     }
-    public void setLastName(String lastName) {
+    public void setLastName(String lastName){
         this.lastName = lastName;
     }
 
-    public String getEmail() {
+    public String getEmail(){
         return email;
     }
-    public void setEmail(String email) {
+    public void setEmail(String email){
         this.email = email;
     }
 
-    public String getPassword() {
+    public String getPassword(){
         return password;
     }
-    public void setPassword(String password) {
+    public void setPassword(String password){
         this.password = password;
     }
 
-    public String getSchool() {
+    public void setCurrentGrade(String grade){
+        this.grade = grade;
+    }
+
+    public String getCurrentGrade(){
+        return grade;
+    }
+
+    public String getSchool(){
         return school;
     }
-    public void setSchool(String school) {
+    public void setSchool(String school){
         this.school = school;
     }
 
     public LocalDate getBirthday() {
         return birthday;
     }
-    public void setBirthday(LocalDate birthday) {
+    public void setBirthday(LocalDate birthday){
         this.birthday = birthday;
-        this.age = calculateAge(); // Recalculate age when birthday changes
     }
 
-    public Schedule getSchedule() {
+    public Schedule getSchedule(){
         return schedule;
     }
+
+
 }

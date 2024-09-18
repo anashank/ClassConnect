@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @PermitAll
-@Route("profile")
+@Route("friends")
 public class FriendsView extends AppLayout {
     // Variables
     String firstName, lastName, currentGrade, email, school;
