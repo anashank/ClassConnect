@@ -31,11 +31,12 @@ import java.util.List;
 @PermitAll
 @Route("friends")
 public class FriendsView extends AppLayout {
+
     // Variables
-    String firstName, lastName, currentGrade, email, school;
-    Grid<Schedule> grid = new Grid<>(Schedule.class);
-    TextField filterText = new TextField();
-    public List<Schedule> schedule = new ArrayList<>();
+    private String firstName, lastName, currentGrade, email, school;
+    private Grid<Schedule> grid = new Grid<>(Schedule.class);
+    private TextField filterText = new TextField();
+    private List<Schedule> scheduleList = new ArrayList<>();
     private UserDetailsServiceImpl databaseService;
     private VerticalLayout contentLayout = new VerticalLayout(); // Container for the content
 
@@ -117,61 +118,63 @@ public class FriendsView extends AppLayout {
 
         HorizontalLayout profileInfo = new HorizontalLayout(firstNameField, lastNameField, emailField, schoolField);
 
-        // Schedule and buttons
-        schedule.add(new Schedule(0, "Subject Name Goes Here", "Teacher's Name Goes here"));
-        ScheduleForm example = new ScheduleForm(grid, schedule);
+        // Initialize the Schedule grid and form
+//        grid.setColumns("className", "teacherName", "period");
+//        scheduleList.add(new Schedule("Subject Name Goes Here", "Teacher's Name Goes Here", 1));
+//        ScheduleForm scheduleForm = new ScheduleForm(grid, scheduleList);
 
         H3 gridLabel = new H3("Schedule");
 
-        Button addSchedule = new Button("Add Schedule");
-        Button editProfile = new Button("Edit Profile");
-        Button done = new Button("Done");
-        Button cancel = new Button("Cancel");
-        Button addRowButton = new Button("Add New Row", e -> example.addNewRow());
-        Button removeRowButton = new Button("Remove a Row", e -> example.removeRow());
+//        Button addSchedule = new Button("Add Schedule");
+//        Button editProfile = new Button("Edit Profile");
+//        Button done = new Button("Done");
+//        Button cancel = new Button("Cancel");
+//        Button addRowButton = new Button("Add New Row", e -> scheduleForm.addNewRow());
+//        Button removeRowButton = new Button("Remove a Row", e -> scheduleForm.removeRow());
 
-        editProfile.addClickListener(event -> {
-            firstNameField.setReadOnly(false);
-            lastNameField.setReadOnly(false);
-            emailField.setReadOnly(false);
-            schoolField.setReadOnly(false);
-            gradeComboBox.setReadOnly(false);
-            contentLayout.add(addRowButton, removeRowButton, cancel, done); // Add buttons to the layout
-            contentLayout.remove(editProfile); // Remove the editProfile button
-        });
-
-        done.addClickListener(event -> {
-            firstName = firstNameField.getValue();
-            lastName = lastNameField.getValue();
-            email = emailField.getValue();
-            school = schoolField.getValue();
-            contentLayout.add(editProfile); // Add the editProfile button back
-            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
-            firstNameField.setReadOnly(true);
-            lastNameField.setReadOnly(true);
-            emailField.setReadOnly(true);
-            schoolField.setReadOnly(true);
-            gradeComboBox.setReadOnly(true);
-            Notification.show("Profile updated successfully");
-        });
-
-        cancel.addClickListener(event -> {
-            firstNameField.clear();
-            lastNameField.clear();
-            emailField.clear();
-            gradeComboBox.clear();
-            schoolField.clear();
-            contentLayout.add(editProfile); // Add the editProfile button back
-            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
-            firstNameField.setReadOnly(true);
-            lastNameField.setReadOnly(true);
-            emailField.setReadOnly(true);
-            schoolField.setReadOnly(true);
-            gradeComboBox.setReadOnly(true);
-            Notification.show("Profile changes canceled");
-        });
+//        editProfile.addClickListener(event -> {
+//            firstNameField.setReadOnly(false);
+//            lastNameField.setReadOnly(false);
+//            emailField.setReadOnly(false);
+//            schoolField.setReadOnly(false);
+//            gradeComboBox.setReadOnly(false);
+//            contentLayout.add(addRowButton, removeRowButton, cancel, done); // Add buttons to the layout
+//            contentLayout.remove(editProfile); // Remove the editProfile button
+//        });
+//
+//        done.addClickListener(event -> {
+//            firstName = firstNameField.getValue();
+//            lastName = lastNameField.getValue();
+//            email = emailField.getValue();
+//            school = schoolField.getValue();
+//            contentLayout.add(editProfile); // Add the editProfile button back
+//            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
+//            firstNameField.setReadOnly(true);
+//            lastNameField.setReadOnly(true);
+//            emailField.setReadOnly(true);
+//            schoolField.setReadOnly(true);
+//            gradeComboBox.setReadOnly(true);
+//            Notification.show("Profile updated successfully");
+//        });
+//
+//        cancel.addClickListener(event -> {
+//            firstNameField.clear();
+//            lastNameField.clear();
+//            emailField.clear();
+//            gradeComboBox.clear();
+//            schoolField.clear();
+//            contentLayout.add(editProfile); // Add the editProfile button back
+//            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
+//            firstNameField.setReadOnly(true);
+//            lastNameField.setReadOnly(true);
+//            emailField.setReadOnly(true);
+//            schoolField.setReadOnly(true);
+//            gradeComboBox.setReadOnly(true);
+//            Notification.show("Profile changes canceled");
+//        });
 
         // Add components to the layout
-        contentLayout.add(title, profileInfo, gridLabel, example, editProfile);
+        //contentLayout.add(title, profileInfo, gridLabel, grid, editProfile);
+        contentLayout.add(title, profileInfo, gridLabel, grid);
     }
 }

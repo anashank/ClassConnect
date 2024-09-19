@@ -53,6 +53,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
 
         setPrimarySection(Section.DRAWER);
     }
+
     private TextField addLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserName = authentication.getName();
