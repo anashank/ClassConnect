@@ -40,6 +40,7 @@ public class FriendsView extends VerticalLayout {
         //Label username = new Label(userform.getUsername());
         Friendslide test = new Friendslide(databaseService);
         ProfilePictureView test2 = new ProfilePictureView();
+        Friends tost = new Friends(databaseService);
         //        this.databaseService = new UserDetailsServiceImpl();
 
         Firstname.setReadOnly(true);
@@ -130,7 +131,7 @@ public class FriendsView extends VerticalLayout {
 
             Notification.show("CLEARED");//Just using this to see if it clears everything
         });
-        //tost.sendFriendRequestNotificaiton();
+        tost.sendFriendRequestNotificaiton();
 
         add(title, test2, horizontalLayout, Lastname, Email, school, grade, gridLabel, example, edit, test);
     }

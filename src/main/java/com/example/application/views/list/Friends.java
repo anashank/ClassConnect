@@ -10,49 +10,28 @@ import java.util.List;
 import java.util.HashMap;
 
 
-public class Friends {
+public class Friends extends UserForm {
 
     boolean friends;
     UserDetailsServiceImpl databaseService;
     List<UserForm> allusers;
-    List<UserForm> friendList;
-    boolean recondFriend;
     int score;
     HashMap<UserForm, Integer> similarity;
-    HashMap<UserForm, Boolean> complete;
+    HashMap<UserForm, Boolean> friendsList;
+ 
 
     public Friends(UserDetailsServiceImpl databaseService) {
         friends = false;
-        recondFriend = false;
         this.databaseService = databaseService;
         allusers = this.databaseService.findAllUsers();
-        friendList = new ArrayList<UserForm>();
         similarity = new HashMap<UserForm, Integer>();
-        complete = new HashMap<UserForm,Boolean>();
+        friendsList = new HashMap<UserForm,Boolean>();
 
         for(int x = 0; x<allusers.size();x++){
             similarity.put(allusers.get(x), 0);
-            complete.put(allusers.get(x),false);
         }
-
-
-
     }
-
-    public Friends(boolean friends, UserDetailsServiceImpl databaseService) {
-        this.friends = friends;
-        this.databaseService = databaseService;
-        allusers = this.databaseService.findAllUsers();
-        recondFriend = false;
-
-    }
-
     public boolean recFriends(UserForm currentUser, UserForm compareUser){
-        for(int x = 0; x<friendList.size();x++) {
-            if (friendList.get(x).equals(compareUser)) {
-                return false;
-            }
-        }
         score = 0;
         boolean classCompare = currentUser.getProfile().getSchedule().getClassName().equals(compareUser.getProfile().getSchedule().getClassName());
         boolean teacherCompare = currentUser.getProfile().getSchedule().getTeacherName().equals(compareUser.getProfile().getSchedule().getTeacherName());
@@ -61,7 +40,6 @@ public class Friends {
 
         if(classCompare && teacherCompare && periodCompare && schoolCompare){
             score += 40;
-
         }
         else if(classCompare && teacherCompare && schoolCompare){
             score += 30;
@@ -86,39 +64,78 @@ public class Friends {
     }
 
     public boolean addFriend(UserForm wee) {
-            friendList.add(wee);
-            complete.put(wee,true);
+        if(isAlreadyFriends(wee)){
+            return false;
+        }
+        else {
+            friendsList.put(wee, true);
             return true;
+        }
     }
 
     public boolean removeFriend(UserForm wee) {
-        friendList.remove(wee);
-        complete.put(wee,false);
+        if(isAlreadyFriends(wee)) {
+            friendsList.put(wee, false);
+            return true;
+        }
+        return false;
+    }
+
+
+    public boolean sendFriendRequest(UserForm receiver) {
+
+        // Check if they're already friends or if there's a pending request
+        if (isAlreadyFriends(receiver)) {
+            Notification.show("You are already friends!", 3000, Notification.Position.MIDDLE);
+            return false;
+        }
+
+        if (isPendingRequest(receiver)) {
+            Notification.show("Friend request already sent!", 3000, Notification.Position.MIDDLE);
+            return false;
+        }
+
+
+        Notification.show("Friend request sent to " + receiver.getUsername(), 3000, Notification.Position.MIDDLE);
         return true;
     }
 
-    public boolean sendFriendRequestNotificaiton() {
+    public boolean isAlreadyFriends(UserForm user2) {
+        return friendsList.getOrDefault(user2, false);
+    }
 
-        Button actionButton = new Button("@_________ sent you a friend request!", event -> {
-            Notification.show("Friend Request received!");
-        });
+    public boolean isPendingRequest(UserForm receiver) {
+        return false; //will figure out logic later
+    }
 
-        // Create the Notification with custom content
-        Notification notification = new Notification();
 
-        // Create a layout to hold content inside the notification
-        HorizontalLayout notificationLayout = new HorizontalLayout();
-        notificationLayout.add(actionButton); // Add the button to the notification
+    public boolean receiveFriendRequestNotificaiton(UserForm we) {
+        if(sendFriendRequest(we)) {
+            Notification notification = new Notification();
+            Button accept = new Button("Accept");
 
-        // Add the layout to the notification
-        notification.add(notificationLayout);
+            Button decline = new Button("Decline");
 
-        // Set notification properties (optional)
-        notification.setPosition(Notification.Position.MIDDLE);
-        notification.setDuration(10000); // Duration (e.g., 10 seconds)
+            Button actionButton = new Button("@_________ sent you a friend request!", event -> {
+                Notification.show("Friend Request received!");
+            });
 
-        // Open the notification
-        notification.open();
+
+            // Create a layout to hold content inside the notification
+            HorizontalLayout notificationLayout = new HorizontalLayout();
+            notificationLayout.add(actionButton, accept, decline); // Add the button to the notification
+
+            // Add the layout to the notification
+            notification.add(notificationLayout);
+
+            // Set notification properties (optional)
+            notification.setPosition(Notification.Position.MIDDLE);
+            notification.setDuration(1000);// Duration (e.g., 10 seconds)
+
+            // Open the notification
+            notification.open();
+            return true;
+        }
         return false;
     }
 
