@@ -21,7 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 @PermitAll
 // Empty '@Route("") means it's the default class that gets loaded
-@Route("home") // defines url
+@Route("dashboard") // defines url
 // found at http://localhost:8080/app-layout-navbar-placement-side
 @CssImport("./styles/styles.css")
 
@@ -50,6 +50,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
 
         setPrimarySection(Section.DRAWER);
     }
+
     private TextField addLoggedInUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserName = authentication.getName();
