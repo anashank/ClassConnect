@@ -1,125 +1,149 @@
 package com.example.application.views.list;
 
-import com.vaadin.flow.component.applayout.AppLayout;
-import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.example.application.repositories.ProfileRepository;
+import com.example.application.repositories.ScheduleRepository;
+import com.example.application.repositories.UserRepository;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.component.orderedlayout.Scroller;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
+import java.util.List;
 
 @PermitAll
-@Route("friends")
-public class ProfileView extends AppLayout {
+@Route("profile")
+public class ProfileView extends VerticalLayout {
 
-    private TextField firstNameField;
-    private TextField lastNameField;
-    private TextField emailField;
-    private TextField schoolField;
-    private TextField birthdayField;
-    private Button saveButton;
-    private VerticalLayout contentLayout = new VerticalLayout();
-    private Profile profile;
+    private final ScheduleRepository scheduleRepository;
+    private final ProfileRepository profileRepository;
+    private final UserRepository userRepository;
+    private UserForm currentUser; // Make sure this is a class-level variable
 
-    public ProfileView() {
+    @Autowired
+    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository, UserRepository userRepository) {
+        this.scheduleRepository = scheduleRepository;
+        this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
 
-        // Create Navbar and Drawer
-        DrawerToggle toggle = new DrawerToggle();
-        H1 title = new H1("Friends");
-        TextField loggedInUser = addLoggedInUser();
-        Button logoutButton = addLogoutButton();
-        loggedInUser.getStyle().set("margin-left", "auto");
-        logoutButton.getStyle().set("margin-left", "auto");
-
-        SideNav nav = getSideNav();
-        Scroller scroller = new Scroller(nav);
-        scroller.setClassName(LumoUtility.Padding.SMALL);
-
-        // Add to layout
-        addToDrawer(scroller);
-        addToNavbar(toggle, title, loggedInUser, logoutButton);
-
-        createFriendsConnect();
-
-        setContent(contentLayout);
-    }
-
-    private void createFriendsConnect() {
-        profile = new Profile("Banana", "Master", "12th", "banana.master24@example.org", "password123", "Bellarmine", LocalDate.of(2006, 1, 1));
-
-        firstNameField = new TextField("First Name");
-        firstNameField.setValue(profile.getFirstName());
-
-        lastNameField = new TextField("Last Name");
-        lastNameField.setValue(profile.getLastName());
-
-        emailField = new TextField("Email");
-        emailField.setValue(profile.getEmail());
-
-        schoolField = new TextField("School");
-        schoolField.setValue(profile.getSchool());
-
-        // birthdayField = new TextField("Birthday");
-        // birthdayField.setValue(profile.getBirthday().toString());
-
-        saveButton = new Button("Save");
-        saveButton.addClickListener(e -> saveProfile());
-
-        contentLayout.add(firstNameField, lastNameField, emailField, schoolField, saveButton);
-    }
-
-    // Adds the current logged-in user to the navbar
-    private TextField addLoggedInUser() {
+        // Get the currently logged-in user
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = authentication.getName();
-        TextField loggedInUser = new TextField("Logged in as:");
-        loggedInUser.setValue(currentUserName);
-        loggedInUser.setReadOnly(true);
-        return loggedInUser;
-    }
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
 
-    // Adds the logout button to the navbar
-    private Button addLogoutButton() {
-        Button logoutButton = new Button("Log Out", event -> {
-            VaadinSession.getCurrent().getSession().invalidate();
-            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
+        // Fetch the user by username and assign it to currentUser
+        currentUser = userRepository.findByUsername(username);
+        if (currentUser == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+
+        // Initialize profile form components
+        TextField firstNameField = new TextField("First Name");
+        TextField lastNameField = new TextField("Last Name");
+        TextField emailField = new TextField("Email");
+        TextField schoolField = new TextField("School");
+        ComboBox<String> gradeComboBox = new ComboBox<>("Select Grade");
+        gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
+
+        // Load existing profile
+        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+
+        // Submit button for profile
+        Button saveButton = new Button("Save Profile", event -> {
+            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+            Notification.show("Profile saved");
         });
-        return logoutButton;
+
+        // Initialize schedule grid
+        Grid<Schedule> scheduleGrid = new Grid<>(Schedule.class);
+        scheduleGrid.setColumns("className", "teacherName", "period");
+        scheduleGrid.addComponentColumn(schedule -> createDeleteButton(schedule, scheduleGrid))
+                .setHeader("Actions");
+
+        loadSchedulesForUser(currentUser, scheduleGrid);
+
+        // Form components for adding a new schedule
+        TextField classNameField = new TextField("Class Name");
+        TextField teacherNameField = new TextField("Teacher Name");
+        IntegerField periodField = new IntegerField("Period");
+
+        // Submit button for schedule
+        Button addScheduleButton = new Button("Add Schedule", event -> {
+            addSchedule(classNameField, teacherNameField, periodField, scheduleGrid); // Pass the scheduleGrid
+            clearScheduleForm(classNameField, teacherNameField, periodField); // Clear form
+        });
+
+        // Layouts
+        VerticalLayout profileLayout = new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, saveButton);
+        VerticalLayout scheduleLayout = new VerticalLayout(classNameField, teacherNameField, periodField, addScheduleButton, scheduleGrid);
+
+        add(profileLayout, scheduleLayout);
     }
 
-    // Navigation drawer items
-    private SideNav getSideNav() {
-        SideNav nav = new SideNav();
-        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()));
-        nav.addItem(new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()));
-        nav.addItem(new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()));
-        nav.addItem(new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()));
-        nav.addItem(new SideNavItem("Schedule", "/schedule", VaadinIcon.CALENDAR.create()));
-        nav.addItem(new SideNavItem("Location", "/location", VaadinIcon.MAP_MARKER.create()));
-        nav.addItem(new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()));
-        nav.addItem(new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
-        return nav;
+    private Button createDeleteButton(Schedule schedule, Grid<Schedule> scheduleGrid) {
+        Button deleteButton = new Button("Delete");
+        deleteButton.addClickListener(event -> {
+            scheduleRepository.delete(schedule); // Delete the schedule from the repository
+            Notification.show("Schedule deleted");
+            loadSchedulesForUser(currentUser, scheduleGrid); // Refresh the grid
+        });
+        return deleteButton;
     }
 
-    private void saveProfile() {
+    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+        Profile profile = profileRepository.findByUser(currentUser).orElse(null);
+        if (profile != null) {
+            firstNameField.setValue(profile.getFirstName());
+            lastNameField.setValue(profile.getLastName());
+            emailField.setValue(profile.getEmail());
+            schoolField.setValue(profile.getSchool());
+            gradeComboBox.setValue(profile.getGrade());
+        }
+    }
+
+    private void loadSchedulesForUser(UserForm user, Grid<Schedule> scheduleGrid) {
+        List<Schedule> schedules = scheduleRepository.findByUser(user);
+        scheduleGrid.setItems(schedules);
+    }
+
+    private void addSchedule(TextField classNameField, TextField teacherNameField, IntegerField periodField, Grid<Schedule> scheduleGrid) {
+        Schedule newSchedule = new Schedule();
+        newSchedule.setClassName(classNameField.getValue());
+        newSchedule.setTeacherName(teacherNameField.getValue());
+        newSchedule.setPeriod(periodField.getValue());
+        newSchedule.setUser(currentUser); // Set the current user directly
+
+        scheduleRepository.save(newSchedule); // Save the schedule
+        Notification.show("New schedule added!");
+
+        // Refresh the schedule grid
+        loadSchedulesForUser(currentUser, scheduleGrid);
+    }
+
+    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+        Profile profile = profileRepository.findByUser(currentUser).orElse(new Profile());
         profile.setFirstName(firstNameField.getValue());
         profile.setLastName(lastNameField.getValue());
         profile.setEmail(emailField.getValue());
         profile.setSchool(schoolField.getValue());
-        // Add more fields as necessary
-        // Implement saving logic (e.g., save to a database or update a list)
+        profile.setGrade(gradeComboBox.getValue());
+        profile.setUser(currentUser); // Associate the profile with the user
+
+        profileRepository.save(profile); // Save the profile
     }
 
-
+    private void clearScheduleForm(TextField classNameField, TextField teacherNameField, IntegerField periodField) {
+        classNameField.clear();
+        teacherNameField.clear();
+        periodField.clear();
+    }
 }

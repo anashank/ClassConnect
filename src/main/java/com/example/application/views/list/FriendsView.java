@@ -1,7 +1,6 @@
 package com.example.application.views.list;
 
 import com.example.application.services.UserDetailsServiceImpl;
-import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -9,35 +8,32 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
-import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @PermitAll
-@Route("profile")
+@Route("friends")
 public class FriendsView extends AppLayout {
+
     // Variables
-    String firstName, lastName, currentGrade, email, school;
-    Grid<Schedule> grid = new Grid<>(Schedule.class);
-    TextField filterText = new TextField();
-    public List<Schedule> schedule = new ArrayList<>();
+    private String firstName, lastName, currentGrade, email, school;
+    private Grid<Schedule> grid = new Grid<>(Schedule.class);
+    private TextField filterText = new TextField();
+    private List<Schedule> scheduleList = new ArrayList<>();
+
     private UserDetailsServiceImpl databaseService;
-    private VerticalLayout contentLayout = new VerticalLayout(); // Container for the content
 
     public FriendsView(UserDetailsServiceImpl databaseService) {
         this.databaseService = databaseService;
@@ -101,77 +97,87 @@ public class FriendsView extends AppLayout {
     // The content of the Friends view
     private void createFriendsContent() {
         H2 title = new H2("User Profile");
-        TextField firstNameField = new TextField("First Name");
-        TextField lastNameField = new TextField("Last Name");
-        EmailField emailField = new EmailField("Email");
-        TextField schoolField = new TextField("School");
+        TextField Firstname = new TextField("First Name");
+        TextField Lastname = new TextField("Last Name");
+        EmailField Email = new EmailField("Email");
+        TextField school = new TextField("School");
+        Friendslide test = new Friendslide(databaseService);
+        ProfilePictureView test2 = new ProfilePictureView();
+        //        this.databaseService = new UserDetailsServiceImpl();
 
-        firstNameField.setReadOnly(true);
-        lastNameField.setReadOnly(true);
-        emailField.setReadOnly(true);
-        schoolField.setReadOnly(true);
+        Firstname.setReadOnly(true);
+        Lastname.setReadOnly(true);
+        Email.setReadOnly(true);
+        school.setReadOnly(true);
 
-        ComboBox<String> gradeComboBox = new ComboBox<>("Select a grade:");
-        gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
-        gradeComboBox.setReadOnly(true);
+        ComboBox<String> grade = new ComboBox<>("Select a grade: ");
+        grade.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
+        //THESE ARE EXAMPLES WILL PUT IN MORE OPTIONS LATER
+        grade.setReadOnly(true);
 
-        HorizontalLayout profileInfo = new HorizontalLayout(firstNameField, lastNameField, emailField, schoolField);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(Firstname, Lastname);
 
-        // Schedule and buttons
-        schedule.add(new Schedule(0, "Subject Name Goes Here", "Teacher's Name Goes here"));
+        // Initialize the Schedule grid and form
+//        grid.setColumns("className", "teacherName", "period");
+//        scheduleList.add(new Schedule("Subject Name Goes Here", "Teacher's Name Goes Here", 1));
+//        ScheduleForm scheduleForm = new ScheduleForm(grid, scheduleList);
+
+        schedule.add(new Schedule(0, "Subject Name Goes Here", "Teacher's Name Goes here"));//example
         ScheduleForm example = new ScheduleForm(grid, schedule);
-
+        //example.configureGrid();
         H3 gridLabel = new H3("Schedule");
+//        Button addSchedule = new Button("Add Schedule");
+//        Button editProfile = new Button("Edit Profile");
+//        Button done = new Button("Done");
+//        Button cancel = new Button("Cancel");
+//        Button addRowButton = new Button("Add New Row", e -> scheduleForm.addNewRow());
+//        Button removeRowButton = new Button("Remove a Row", e -> scheduleForm.removeRow());
 
-        Button addSchedule = new Button("Add Schedule");
-        Button editProfile = new Button("Edit Profile");
-        Button done = new Button("Done");
-        Button cancel = new Button("Cancel");
-        Button addRowButton = new Button("Add New Row", e -> example.addNewRow());
-        Button removeRowButton = new Button("Remove a Row", e -> example.removeRow());
-
-        editProfile.addClickListener(event -> {
-            firstNameField.setReadOnly(false);
-            lastNameField.setReadOnly(false);
-            emailField.setReadOnly(false);
-            schoolField.setReadOnly(false);
-            gradeComboBox.setReadOnly(false);
-            contentLayout.add(addRowButton, removeRowButton, cancel, done); // Add buttons to the layout
-            contentLayout.remove(editProfile); // Remove the editProfile button
-        });
-
-        done.addClickListener(event -> {
-            firstName = firstNameField.getValue();
-            lastName = lastNameField.getValue();
-            email = emailField.getValue();
-            school = schoolField.getValue();
-            contentLayout.add(editProfile); // Add the editProfile button back
-            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
-            firstNameField.setReadOnly(true);
-            lastNameField.setReadOnly(true);
-            emailField.setReadOnly(true);
-            schoolField.setReadOnly(true);
-            gradeComboBox.setReadOnly(true);
-            Notification.show("Profile updated successfully");
-        });
-
-        cancel.addClickListener(event -> {
-            firstNameField.clear();
-            lastNameField.clear();
-            emailField.clear();
-            gradeComboBox.clear();
-            schoolField.clear();
-            contentLayout.add(editProfile); // Add the editProfile button back
-            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
-            firstNameField.setReadOnly(true);
-            lastNameField.setReadOnly(true);
-            emailField.setReadOnly(true);
-            schoolField.setReadOnly(true);
-            gradeComboBox.setReadOnly(true);
-            Notification.show("Profile changes canceled");
-        });
+//        editProfile.addClickListener(event -> {
+//            firstNameField.setReadOnly(false);
+//            lastNameField.setReadOnly(false);
+//            emailField.setReadOnly(false);
+//            schoolField.setReadOnly(false);
+//            gradeComboBox.setReadOnly(false);
+//            contentLayout.add(addRowButton, removeRowButton, cancel, done); // Add buttons to the layout
+//            contentLayout.remove(editProfile); // Remove the editProfile button
+//        });
+//
+//        done.addClickListener(event -> {
+//            firstName = firstNameField.getValue();
+//            lastName = lastNameField.getValue();
+//            email = emailField.getValue();
+//            school = schoolField.getValue();
+//            contentLayout.add(editProfile); // Add the editProfile button back
+//            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
+//            firstNameField.setReadOnly(true);
+//            lastNameField.setReadOnly(true);
+//            emailField.setReadOnly(true);
+//            schoolField.setReadOnly(true);
+//            gradeComboBox.setReadOnly(true);
+//            Notification.show("Profile updated successfully");
+//        });
+//
+//        cancel.addClickListener(event -> {
+//            firstNameField.clear();
+//            lastNameField.clear();
+//            emailField.clear();
+//            gradeComboBox.clear();
+//            schoolField.clear();
+//            contentLayout.add(editProfile); // Add the editProfile button back
+//            contentLayout.remove(addRowButton, removeRowButton, cancel, done); // Remove editing buttons
+//            firstNameField.setReadOnly(true);
+//            lastNameField.setReadOnly(true);
+//            emailField.setReadOnly(true);
+//            schoolField.setReadOnly(true);
+//            gradeComboBox.setReadOnly(true);
+//            Notification.show("Profile changes canceled");
+//        });
 
         // Add components to the layout
-        contentLayout.add(title, profileInfo, gridLabel, example, editProfile);
+        //contentLayout.add(title, profileInfo, gridLabel, grid, editProfile);
+        contentLayout.add(title, profileInfo, gridLabel, grid);
     }
+
 }
