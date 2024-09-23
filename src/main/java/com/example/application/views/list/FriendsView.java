@@ -61,7 +61,7 @@ public class FriendsView extends AppLayout {
         createFriendsContent();
 
         // Set the content of the AppLayout
-        setContent(contentLayout);
+        // setContent(contentLayout);
     }
 
     // Adds the current logged-in user to the navbar
@@ -126,8 +126,8 @@ public class FriendsView extends AppLayout {
 //        scheduleList.add(new Schedule("Subject Name Goes Here", "Teacher's Name Goes Here", 1));
 //        ScheduleForm scheduleForm = new ScheduleForm(grid, scheduleList);
 
-        schedule.add(new Schedule(0, "Subject Name Goes Here", "Teacher's Name Goes here"));//example
-        ScheduleForm example = new ScheduleForm(grid, schedule);
+        // schedule.add(new Schedule(0, "Subject Name Goes Here", "Teacher's Name Goes here"));//example
+        // ScheduleForm example = new ScheduleForm(grid, schedule);
         //example.configureGrid();
         H3 gridLabel = new H3("Schedule");
 //        Button addSchedule = new Button("Add Schedule");
@@ -180,7 +180,7 @@ public class FriendsView extends AppLayout {
 
         // Add components to the layout
         //contentLayout.add(title, profileInfo, gridLabel, grid, editProfile);
-        contentLayout.add(title, profileInfo, gridLabel, grid);
+        // contentLayout.add(title, profileInfo, gridLabel, grid);
     }
 
 }
