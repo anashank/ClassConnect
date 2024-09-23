@@ -38,5 +38,6 @@ public class LoginView extends VerticalLayout {
                 login,
                 regButton
         );
+        //hello
     }
 }
