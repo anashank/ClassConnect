@@ -12,7 +12,6 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.EmailField;
@@ -36,8 +35,8 @@ public class FriendsView extends AppLayout {
     private Grid<Schedule> grid = new Grid<>(Schedule.class);
     private TextField filterText = new TextField();
     private List<Schedule> scheduleList = new ArrayList<>();
+
     private UserDetailsServiceImpl databaseService;
-    private VerticalLayout contentLayout = new VerticalLayout(); // Container for the content
 
     public FriendsView(UserDetailsServiceImpl databaseService) {
         this.databaseService = databaseService;
@@ -101,29 +100,36 @@ public class FriendsView extends AppLayout {
     // The content of the Friends view
     private void createFriendsContent() {
         H2 title = new H2("User Profile");
-        TextField firstNameField = new TextField("First Name");
-        TextField lastNameField = new TextField("Last Name");
-        EmailField emailField = new EmailField("Email");
-        TextField schoolField = new TextField("School");
+        TextField Firstname = new TextField("First Name");
+        TextField Lastname = new TextField("Last Name");
+        EmailField Email = new EmailField("Email");
+        TextField school = new TextField("School");
+        Friendslide test = new Friendslide(databaseService);
+        ProfilePictureView test2 = new ProfilePictureView();
+        //        this.databaseService = new UserDetailsServiceImpl();
 
-        firstNameField.setReadOnly(true);
-        lastNameField.setReadOnly(true);
-        emailField.setReadOnly(true);
-        schoolField.setReadOnly(true);
+        Firstname.setReadOnly(true);
+        Lastname.setReadOnly(true);
+        Email.setReadOnly(true);
+        school.setReadOnly(true);
 
-        ComboBox<String> gradeComboBox = new ComboBox<>("Select a grade:");
-        gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
-        gradeComboBox.setReadOnly(true);
+        ComboBox<String> grade = new ComboBox<>("Select a grade: ");
+        grade.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
+        //THESE ARE EXAMPLES WILL PUT IN MORE OPTIONS LATER
+        grade.setReadOnly(true);
 
-        HorizontalLayout profileInfo = new HorizontalLayout(firstNameField, lastNameField, emailField, schoolField);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.add(Firstname, Lastname);
 
         // Initialize the Schedule grid and form
 //        grid.setColumns("className", "teacherName", "period");
 //        scheduleList.add(new Schedule("Subject Name Goes Here", "Teacher's Name Goes Here", 1));
 //        ScheduleForm scheduleForm = new ScheduleForm(grid, scheduleList);
 
+        schedule.add(new Schedule(0, "Subject Name Goes Here", "Teacher's Name Goes here"));//example
+        ScheduleForm example = new ScheduleForm(grid, schedule);
+        //example.configureGrid();
         H3 gridLabel = new H3("Schedule");
-
 //        Button addSchedule = new Button("Add Schedule");
 //        Button editProfile = new Button("Edit Profile");
 //        Button done = new Button("Done");
@@ -176,4 +182,5 @@ public class FriendsView extends AppLayout {
         //contentLayout.add(title, profileInfo, gridLabel, grid, editProfile);
         contentLayout.add(title, profileInfo, gridLabel, grid);
     }
+
 }

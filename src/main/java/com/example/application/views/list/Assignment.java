@@ -1,5 +1,10 @@
 package com.example.application.views.list;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -43,3 +48,4 @@ public class Assignment {
     public UserForm getUser() { return user; }
     public void setUser(UserForm user) { this.user = user; }
 }
+
