@@ -2,19 +2,21 @@ package com.example.application.views.list;
 
 import com.example.application.repositories.ProfileRepository;
 import com.example.application.repositories.ScheduleRepository;
+import com.example.application.repositories.UserRepository;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -24,163 +26,124 @@ public class ProfileView extends VerticalLayout {
 
     private final ScheduleRepository scheduleRepository;
     private final ProfileRepository profileRepository;
-    private final Grid<Schedule> scheduleGrid = new Grid<>(Schedule.class);
-    private boolean isEditing = false;
-    private Profile profile;
-
-    // Declare fields as instance variables
-    private TextField firstNameField;
-    private TextField lastNameField;
-    private TextField emailField;
-    private TextField schoolField;
-    private ComboBox<String> gradeComboBox;
+    private final UserRepository userRepository;
+    private UserForm currentUser; // Make sure this is a class-level variable
 
     @Autowired
-    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository) {
+    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository, UserRepository userRepository) {
         this.scheduleRepository = scheduleRepository;
         this.profileRepository = profileRepository;
+        this.userRepository = userRepository;
 
-        profile = getCurrentProfile(); // Method to get the current profile
+        // Get the currently logged-in user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
 
-        H2 title = new H2("User Profile");
-        firstNameField = new TextField("First Name");
-        lastNameField = new TextField("Last Name");
-        emailField = new TextField("Email");
-        schoolField = new TextField("School");
-        gradeComboBox = new ComboBox<>("Select Grade");
+        // Fetch the user by username and assign it to currentUser
+        currentUser = userRepository.findByUsername(username);
+        if (currentUser == null) {
+            throw new RuntimeException("User not found: " + username);
+        }
+
+        // Initialize profile form components
+        TextField firstNameField = new TextField("First Name");
+        TextField lastNameField = new TextField("Last Name");
+        TextField emailField = new TextField("Email");
+        TextField schoolField = new TextField("School");
+        ComboBox<String> gradeComboBox = new ComboBox<>("Select Grade");
         gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
 
-        Button addScheduleButton = new Button("Add Schedule");
-        Button editButton = new Button("Edit Profile");
-        Button saveButton = new Button("Save");
-        Button cancelButton = new Button("Cancel");
+        // Load existing profile
+        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
 
-        addScheduleButton.addClickListener(event -> addNewSchedule());
-        editButton.addClickListener(event -> toggleEditMode(true));
-        saveButton.addClickListener(event -> saveProfile());
-        cancelButton.addClickListener(event -> cancelEdit());
+        // Submit button for profile
+        Button saveButton = new Button("Save Profile", event -> {
+            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+            Notification.show("Profile saved");
+        });
 
-        // Set up grid columns
+        // Initialize schedule grid
+        Grid<Schedule> scheduleGrid = new Grid<>(Schedule.class);
         scheduleGrid.setColumns("className", "teacherName", "period");
+        scheduleGrid.addComponentColumn(schedule -> createDeleteButton(schedule, scheduleGrid))
+                .setHeader("Actions");
 
-        // Define grid editor components
-        TextField classField = new TextField("Subject");
-        TextField teacherField = new TextField("Teacher's Full Name");
+        loadSchedulesForUser(currentUser, scheduleGrid);
 
-        classField.setPlaceholder("Enter subject");
-        teacherField.setPlaceholder("Enter teacher's name");
+        // Form components for adding a new schedule
+        TextField classNameField = new TextField("Class Name");
+        TextField teacherNameField = new TextField("Teacher Name");
+        IntegerField periodField = new IntegerField("Period");
 
-        setupGridEditor(classField, teacherField);
+        // Submit button for schedule
+        Button addScheduleButton = new Button("Add Schedule", event -> {
+            addSchedule(classNameField, teacherNameField, periodField, scheduleGrid); // Pass the scheduleGrid
+            clearScheduleForm(classNameField, teacherNameField, periodField); // Clear form
+        });
 
-        HorizontalLayout profileLayout = new HorizontalLayout(firstNameField, lastNameField);
-        VerticalLayout formLayout = new VerticalLayout(
-                title,
-                profileLayout,
-                emailField,
-                schoolField,
-                gradeComboBox,
-                scheduleGrid,
-                addScheduleButton,
-                editButton,
-                saveButton,
-                cancelButton
-        );
+        // Layouts
+        VerticalLayout profileLayout = new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, saveButton);
+        VerticalLayout scheduleLayout = new VerticalLayout(classNameField, teacherNameField, periodField, addScheduleButton, scheduleGrid);
 
-        add(formLayout);
-
-        loadProfileData();
+        add(profileLayout, scheduleLayout);
     }
 
-    private Profile getCurrentProfile() {
-        // Retrieve the current user's profile (e.g., from a session or security context)
-        Profile profile = profileRepository.findById(1L).orElse(new Profile());
-        if (profile.getId() == null) {
-            // If profile is new and not yet saved, save it now
-            profileRepository.save(profile);
+    private Button createDeleteButton(Schedule schedule, Grid<Schedule> scheduleGrid) {
+        Button deleteButton = new Button("Delete");
+        deleteButton.addClickListener(event -> {
+            scheduleRepository.delete(schedule); // Delete the schedule from the repository
+            Notification.show("Schedule deleted");
+            loadSchedulesForUser(currentUser, scheduleGrid); // Refresh the grid
+        });
+        return deleteButton;
+    }
+
+    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+        Profile profile = profileRepository.findByUser(currentUser).orElse(null);
+        if (profile != null) {
+            firstNameField.setValue(profile.getFirstName());
+            lastNameField.setValue(profile.getLastName());
+            emailField.setValue(profile.getEmail());
+            schoolField.setValue(profile.getSchool());
+            gradeComboBox.setValue(profile.getGrade());
         }
-        return profile;
     }
 
-    private void setupGridEditor(TextField classField, TextField teacherField) {
-        // Set up grid editor binder
-        Binder<Schedule> binder = new Binder<>(Schedule.class);
-        binder.forField(classField)
-                .asRequired("Subject is required")
-                .withValidator(new StringLengthValidator("Subject name must be between 1 and 100 characters", 1, 100))
-                .bind(Schedule::getClassName, Schedule::setClassName);
-        binder.forField(teacherField)
-                .asRequired("Teacher's name is required")
-                .withValidator(new StringLengthValidator("Teacher's name must be between 1 and 100 characters", 1, 100))
-                .bind(Schedule::getTeacherName, Schedule::setTeacherName);
-
-        scheduleGrid.getEditor().setBinder(binder);
-
-        // Configure the grid editor
-        scheduleGrid.addItemClickListener(event -> {
-            if (isEditing) {
-                scheduleGrid.getEditor().editItem(event.getItem());
-            }
-        });
-
-        scheduleGrid.getEditor().addSaveListener(event -> {
-            scheduleRepository.save(event.getItem());
-            Notification.show("Schedule saved");
-        });
-
-        scheduleGrid.getEditor().addCancelListener(event -> {
-            Notification.show("Edit canceled");
-        });
-    }
-
-    private void loadProfileData() {
-        // Load and display profile data and schedules from the repository
-        List<Schedule> schedules = scheduleRepository.findByProfile(profile);
+    private void loadSchedulesForUser(UserForm user, Grid<Schedule> scheduleGrid) {
+        List<Schedule> schedules = scheduleRepository.findByUser(user);
         scheduleGrid.setItems(schedules);
-
-        // Populate profile fields
-        firstNameField.setValue(profile.getFirstName() != null ? profile.getFirstName() : "");
-        lastNameField.setValue(profile.getLastName() != null ? profile.getLastName() : "");
-        emailField.setValue(profile.getEmail() != null ? profile.getEmail() : "");
-        schoolField.setValue(profile.getSchool() != null ? profile.getSchool() : "");
-        gradeComboBox.setValue(profile.getGrade() != null ? profile.getGrade() : "");
     }
 
-    private void addNewSchedule() {
-        Schedule newSchedule = new Schedule(); // Create a new Schedule with default values
-        newSchedule.setProfile(profile); // Link new schedule to the current profile
-        scheduleRepository.save(newSchedule);
-        loadProfileData(); // Refresh grid to show new schedule
-        Notification.show("New schedule added");
+    private void addSchedule(TextField classNameField, TextField teacherNameField, IntegerField periodField, Grid<Schedule> scheduleGrid) {
+        Schedule newSchedule = new Schedule();
+        newSchedule.setClassName(classNameField.getValue());
+        newSchedule.setTeacherName(teacherNameField.getValue());
+        newSchedule.setPeriod(periodField.getValue());
+        newSchedule.setUser(currentUser); // Set the current user directly
+
+        scheduleRepository.save(newSchedule); // Save the schedule
+        Notification.show("New schedule added!");
+
+        // Refresh the schedule grid
+        loadSchedulesForUser(currentUser, scheduleGrid);
     }
 
-    private void saveProfile() {
-        // Validate and set profile data
-        String email = emailField.getValue();
+    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+        Profile profile = profileRepository.findByUser(currentUser).orElse(new Profile());
         profile.setFirstName(firstNameField.getValue());
         profile.setLastName(lastNameField.getValue());
-        profile.setEmail(email != null && !email.trim().isEmpty() ? email : null); // Handle null case
+        profile.setEmail(emailField.getValue());
         profile.setSchool(schoolField.getValue());
         profile.setGrade(gradeComboBox.getValue());
+        profile.setUser(currentUser); // Associate the profile with the user
 
-        profileRepository.save(profile);
-        Notification.show("Profile saved");
-        toggleEditMode(false);
+        profileRepository.save(profile); // Save the profile
     }
 
-    private void cancelEdit() {
-        // Reset fields to their original values
-        firstNameField.setValue(profile.getFirstName() != null ? profile.getFirstName() : "");
-        lastNameField.setValue(profile.getLastName() != null ? profile.getLastName() : "");
-        emailField.setValue(profile.getEmail() != null ? profile.getEmail() : "");
-        schoolField.setValue(profile.getSchool() != null ? profile.getSchool() : "");
-        gradeComboBox.setValue(profile.getGrade() != null ? profile.getGrade() : "");
-
-        toggleEditMode(false);
-        Notification.show("Edit canceled");
-    }
-
-    private void toggleEditMode(boolean isEditing) {
-        this.isEditing = isEditing;
-        scheduleGrid.getEditor().getBinder().getFields().forEach(field -> field.setReadOnly(!isEditing));
+    private void clearScheduleForm(TextField classNameField, TextField teacherNameField, IntegerField periodField) {
+        classNameField.clear();
+        teacherNameField.clear();
+        periodField.clear();
     }
 }
