@@ -25,7 +25,7 @@ public class Profile {
     @Column(nullable = true)
     private String school;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserForm user; // Link to UserForm
 

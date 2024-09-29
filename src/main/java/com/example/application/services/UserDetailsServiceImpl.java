@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,10 +27,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserForm user = userRepository.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        }
+        Optional<UserForm> userOpt = userRepository.findByUsername(username);
+        UserForm user = userOpt.orElseThrow(() ->
+                new UsernameNotFoundException("User not found with username: " + username)
+        );
+
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getUsername())
                 .password(user.getPassword())
@@ -49,7 +51,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     public void createTestUsers() {
-        if (userRepository.findByUsername("user1") == null) {
+        // Using Optional to check for the user
+        if (userRepository.findByUsername("user1").isEmpty()) {
             UserForm testUser = new UserForm();
             testUser.setUsername("user1");
             testUser.setPassword(passwordEncoder.encode("password1"));

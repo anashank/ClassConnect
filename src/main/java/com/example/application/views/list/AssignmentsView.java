@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @PermitAll
 @Route("assignments")
@@ -39,7 +40,11 @@ public class AssignmentsView extends VerticalLayout {
         String username = userDetails.getUsername();
 
         // Fetch the user by username
-        UserForm loggedInUser = userRepository.findByUsername(username);
+
+//        UserForm loggedInUser = userRepository.findByUsername(username);
+        Optional<UserForm> userOpt = userRepository.findByUsername(username);
+        UserForm loggedInUser = userOpt.orElseThrow(() -> new RuntimeException("User not found: " + username));
+
 
         if (loggedInUser == null) {
             throw new RuntimeException("User not found: " + username); // Handle the case when the user is not found
