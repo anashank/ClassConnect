@@ -18,7 +18,7 @@ public class Friends extends UserForm {
     int score;
     HashMap<UserForm, Integer> similarity;
     HashMap<UserForm, Boolean> friendsList;
- 
+
 
     public Friends(UserDetailsServiceImpl databaseService) {
         friends = false;

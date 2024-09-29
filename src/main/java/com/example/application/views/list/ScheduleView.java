@@ -1,7 +1,11 @@
 package com.example.application.views.list;
 
+import com.example.application.services.UserDetailsServiceImpl;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
@@ -13,12 +17,23 @@ import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
 import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @PermitAll
 @Route("schedule")
 public class ScheduleView extends VerticalLayout {
+    UserDetailsServiceImpl databaseService;
+    Groups group;
+    List<UserForm> allusers;
+    UserForm user1;
+    UserForm user2;
 
-    public ScheduleView() {
+    public ScheduleView(){
+        //databaseService = new UserDetailsServiceImpl();
+       group = new Groups();
+    //    allusers = this.databaseService.findAllUsers();
+        H2 title = new H2("Schedule Group");
 
         DatePicker datePicker = new DatePicker("Select Date");
         TextField timeField = new TextField("Select Time");
@@ -57,7 +72,74 @@ public class ScheduleView extends VerticalLayout {
         calendarContainer.setHeight("500px");
         calendarContainer.getStyle().set("border", "1px solid #ccc"); // Optional: Add border for better visibility
 
+        Button createGroupButton = new Button("Create Group");
+        createGroupButton.addClickListener(event -> openGroupCreationDialog());
+        add(title, calendarContainer,datePicker,timeField,createGroupButton,submitButton);
 
-        add(calendarContainer,datePicker,timeField,submitButton);
+
+
     }
-}
+
+    private void openGroupCreationDialog() {
+        // Create a dialog for group creation
+        Dialog groupDialog = new Dialog();
+
+        TextField usernameField = new TextField("Username");
+
+        ComboBox<String> publicView = new ComboBox<>("Would you like your study group public or private?");
+        publicView.setItems("Public", "Private");
+        if(publicView.toString().equals("Public")){
+            group.setStudyGroupPublicity(true);
+        }
+        else{
+            group.setStudyGroupPublicity(false);
+        }
+
+        Button addUserButton = new Button("Add User");
+
+        VerticalLayout userListLayout = new VerticalLayout();
+        userListLayout.add(usernameField); // Add the first field
+
+        // Add click listener to dynamically add more user input fields
+        addUserButton.addClickListener(event -> {
+            TextField newUsernameField = new TextField("Username");
+            userListLayout.add(newUsernameField);
+        });
+
+        // Confirm button to create the group
+        Button confirmButton = new Button("Confirm", event -> {
+            List<UserForm> users = new ArrayList<UserForm>();
+            userListLayout.getChildren().forEach(component -> {
+                if (component instanceof TextField) {
+                    TextField field = (TextField) component;
+                    String username = field.getValue();
+
+//                    UserForm user = loadUserByUsername(username);
+//                    if (user != null) {
+//                        users.add(user);
+//                    }
+                }
+            });
+            group.setNewGroup(users);
+            groupDialog.close();
+        });
+
+        // Cancel button to close the dialog
+        Button cancelButton = new Button("Cancel", event -> groupDialog.close());
+
+        groupDialog.add(userListLayout, addUserButton, confirmButton, cancelButton);
+        groupDialog.open();
+    }
+
+//    public UserForm loadUserByUsername(String username){
+//        for(int x = 0; x<allusers.size();x++){
+//            if(allusers.get(x).getUsername().equals(username)){
+//                return allusers.get(x);
+//            }
+//        }
+//        return null;
+//    }
+
+
+    }
+
