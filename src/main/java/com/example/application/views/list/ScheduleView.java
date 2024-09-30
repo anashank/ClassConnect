@@ -16,6 +16,7 @@ import org.vaadin.stefan.fullcalendar.FullCalendar;
 import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
 import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 
+import java.awt.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,8 +33,10 @@ public class ScheduleView extends VerticalLayout {
     public ScheduleView(){
         //databaseService = new UserDetailsServiceImpl();
        group = new Groups();
-    //    allusers = this.databaseService.findAllUsers();
+       //allusers = this.databaseService.findAllUsers();
         H2 title = new H2("Schedule Group");
+        TextField groupName = new TextField("Group Name");
+        TextField subject = new TextField("Subject");
 
         DatePicker datePicker = new DatePicker("Select Date");
         TextField timeField = new TextField("Select Time");
@@ -74,7 +77,7 @@ public class ScheduleView extends VerticalLayout {
 
         Button createGroupButton = new Button("Create Group");
         createGroupButton.addClickListener(event -> openGroupCreationDialog());
-        add(title, calendarContainer,datePicker,timeField,createGroupButton,submitButton);
+        add(title, groupName, subject ,calendarContainer,datePicker,timeField,createGroupButton,submitButton);
 
 
 
@@ -131,14 +134,14 @@ public class ScheduleView extends VerticalLayout {
         groupDialog.open();
     }
 
-//    public UserForm loadUserByUsername(String username){
-//        for(int x = 0; x<allusers.size();x++){
-//            if(allusers.get(x).getUsername().equals(username)){
-//                return allusers.get(x);
-//            }
-//        }
-//        return null;
-//    }
+    public UserForm loadUserByUsername(String username){
+        for(int x = 0; x<allusers.size();x++){
+            if(allusers.get(x).getUsername().equals(username)){
+                return allusers.get(x);
+            }
+        }
+        return null;
+    }
 
 
     }
