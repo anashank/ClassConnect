@@ -1,4 +1,5 @@
 package com.example.application.views.list;
+
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -6,11 +7,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-public class UserForm implements UserDetails{
-    Profile profile;
+public class UserForm implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,46 +25,25 @@ public class UserForm implements UserDetails{
     private String password;
 
     @Column(nullable = false, length = 100)
-    private String email; // Optional
+    private String email;
 
+    // Study groups created by this user
+    @OneToMany(mappedBy = "creator")
+    private Set<StudyGroup> createdGroups = new HashSet<>();
+
+    // Study groups this user has joined
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_joined_groups",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "group_id")
+    )
+    private Set<StudyGroup> joinedGroups = new HashSet<>();
+
+    // Implementing UserDetails methods
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null; // Customize as per your roles/authorities implementation
-    }
-    // Getters and Setters
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+        return null; // Return roles/authorities if implemented
     }
 
     @Override
@@ -85,13 +66,42 @@ public class UserForm implements UserDetails{
         return true;
     }
 
-    public Profile getProfile(){
-        return profile;
+    // Getters and Setters for user attributes
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    // Getters and Setters for group relationships
+    public Set<StudyGroup> getCreatedGroups() {
+        return createdGroups;
     }
 
-    public void setProfile(Profile profile){
-        this.profile = profile;
+    public void setCreatedGroups(Set<StudyGroup> createdGroups) {
+        this.createdGroups = createdGroups;
     }
 
+    public Set<StudyGroup> getJoinedGroups() {
+        return joinedGroups;
+    }
 
+    public void setJoinedGroups(Set<StudyGroup> joinedGroups) {
+        this.joinedGroups = joinedGroups;
+    }
+
+    // Method to add a study group to the joinedGroups set
+    public void addJoinedGroup(StudyGroup studyGroup) {
+        // Check if the study group is already joined
+        if (joinedGroups.contains(studyGroup)) {
+            throw new IllegalStateException("User is already a member of this study group.");
+        }
+        joinedGroups.add(studyGroup);
+    }
 }

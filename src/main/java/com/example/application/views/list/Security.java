@@ -31,7 +31,7 @@ public class Security extends VaadinWebSecurity {
                         .loginPage("/login")
                         .successHandler((request, response, authentication) -> {
                             // Redirect to /user-form after successful login
-                            response.sendRedirect("/profile");
+                            response.sendRedirect("/dashboard");
                         })
                         .failureHandler((request, response, authentication) -> {
                                     // Redirect to /user-form after successful login

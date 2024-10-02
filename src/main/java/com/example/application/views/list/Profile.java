@@ -1,100 +1,50 @@
 package com.example.application.views.list;
-import java.time.LocalDate;
-import java.util.ArrayList;
 
-public class Profile extends UserForm{
-    String firstName, lastName,grade, email, password, school;
-    int age;
-    LocalDate birthday;
-    LocalDate currentDate = LocalDate.now();
-    Schedule schedule = new Schedule();
-    ArrayList <Friends> friends;
+import jakarta.persistence.*;
 
-   public Profile(){//default
-        firstName = null;
-        lastName = null;
-        grade = null;
-        email = null;
-        password = null;
-        school = null;
-        age = 0;
-        birthday = null;
-    }
-   public Profile(String firstName, String lastName, String grade, String email, String password, String school, LocalDate birthday){//will put more stuff in later
-       this.firstName = firstName;
-       this.lastName = lastName;
-       this.grade = grade;
-       this.email = email;
-       this.password = password;
-       this.school = school;
-       this.age = calculateAge();
-       this.birthday = birthday;
-    }
-    //making up methods first
-    public int calculateAge(){
-       age = currentDate.getYear() - birthday.getYear();
-        if (currentDate.getDayOfYear() < birthday.getDayOfYear()) {
-            age = age-1;
-        }
-        return age;
-    }
-    public int getAge(){
-       return age;
-    }
+@Entity
+@Table(name = "profiles")
+public class Profile {
 
-    public String getFirstName(){
-       return firstName;
-    }
-    public void setFirstName(String firstName){
-       this.firstName = firstName;
-    }
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public String getLastName(){
-       return lastName;
-    }
-    public void setLastName(String lastName){
-       this.lastName = lastName;
-    }
+    @Column(nullable = true)
+    private String firstName;
 
-    public String getEmail(){
-       return email;
-    }
-    public void setEmail(String email){
-       this.email = email;
-    }
+    @Column(nullable = true)
+    private String lastName;
 
-    public String getPassword(){
-       return password;
-    }
-    public void setPassword(String password){
-       this.password = password;
-    }
+    @Column(nullable = true)
+    private String grade;
 
-    public void setCurrentGrade(String grade){
-       this.grade = grade;
-    }
+    @Column(nullable = true)
+    private String email;
 
-    public String getCurrentGrade(){
-       return grade;
-    }
+    @Column(nullable = true)
+    private String school;
 
-    public String getSchool(){
-       return school;
-    }
-    public void setSchool(String school){
-       this.school = school;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserForm user; // Link to UserForm
 
-    public LocalDate getBirthday() {
-       return birthday;
-    }
-    public void setBirthday(LocalDate birthday){
-       this.birthday = birthday;
-    }
+    // Default constructor
+    public Profile() {}
 
-    public Schedule getSchedule(){
-       return schedule;
-    }
-
-
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public String getSchool() { return school; }
+    public void setSchool(String school) { this.school = school; }
+    public UserForm getUser() { return user; }
+    public void setUser(UserForm user) { this.user = user; }
 }
