@@ -1,5 +1,6 @@
 package com.example.application.views.list;
 
+import com.example.application.repositories.GroupRepository;
 import com.example.application.repositories.ProfileRepository;
 import com.example.application.repositories.ScheduleRepository;
 import com.example.application.services.UserService;
@@ -19,7 +20,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @PermitAll
 @Route("profile")
@@ -27,17 +27,19 @@ public class ProfileView extends VerticalLayout {
 
     private final ScheduleRepository scheduleRepository;
     private final ProfileRepository profileRepository;
+    private final GroupRepository groupRepository;
     private final UserService userService;
     private final UserForm currentUser;
 
     // Grid for displaying study groups and schedules
-    private final Grid<StudyGroup> studyGroupGrid = new Grid<>(StudyGroup.class);
+    private final Grid<Groups> studyGroupGrid = new Grid<>(Groups.class);
     private final Grid<Schedule> scheduleGrid = new Grid<>(Schedule.class);
 
     @Autowired
-    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository, UserService userService) {
+    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository, GroupRepository groupRepository, UserService userService) {
         this.scheduleRepository = scheduleRepository;
         this.profileRepository = profileRepository;
+        this.groupRepository = groupRepository;
         this.userService = userService;
 
         // Get the currently logged-in user
@@ -97,6 +99,21 @@ public class ProfileView extends VerticalLayout {
         loadSchedulesForUser(currentUser);
     }
 
+    private void setupStudyGroupGrid() {
+        // Clear any existing columns before setting up new ones
+        studyGroupGrid.removeAllColumns();
+
+        // Define the columns to display
+        studyGroupGrid.addColumn(Groups::getGroupName).setHeader("Group Name");
+        studyGroupGrid.addColumn(Groups::getSubject).setHeader("Subject");
+        studyGroupGrid.addColumn(Groups::getDate).setHeader("Date");
+        studyGroupGrid.addColumn(Groups::getTime).setHeader("Time");
+
+        // Load the joined study groups based on the current user's username
+        loadJoinedStudyGroups();
+    }
+
+
     private Button createDeleteButton(Schedule schedule) {
         Button deleteButton = new Button("Delete");
         deleteButton.addClickListener(event -> {
@@ -122,14 +139,10 @@ public class ProfileView extends VerticalLayout {
         scheduleGrid.setItems(schedules);
     }
 
-    private void setupStudyGroupGrid() {
-        studyGroupGrid.setColumns("name", "subject", "date");
-        loadJoinedStudyGroups();
-    }
-
     private void loadJoinedStudyGroups() {
-        Set<StudyGroup> joinedGroupsSet = currentUser.getJoinedGroups();
-        studyGroupGrid.setItems(new ArrayList<>(joinedGroupsSet)); // Convert Set to List and set items in the grid
+        // Get the groups that the current user is part of
+        List<Groups> joinedGroups = groupRepository.findByUsernamesContaining(currentUser.getUsername());
+        studyGroupGrid.setItems(joinedGroups); // Set the items in the grid
     }
 
     private void addSchedule(TextField classNameField, TextField teacherNameField, IntegerField periodField) {

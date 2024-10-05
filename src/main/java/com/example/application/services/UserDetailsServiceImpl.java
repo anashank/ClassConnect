@@ -25,6 +25,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public UserForm findUserByUsername(String username) {
+        Optional<UserForm> userOpt = userRepository.findByUsername(username);
+        return userOpt.orElse(null); // or throw an exception if user is not found
+    }
+
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<UserForm> userOpt = userRepository.findByUsername(username);

@@ -111,7 +111,7 @@ public class FriendsView extends AppLayout {
         //Label username = new Label(userform.getUsername());
         Friendslide test = new Friendslide(databaseService);
         ProfilePictureView test2 = new ProfilePictureView();
-        Friends tost = new Friends(databaseService);
+        //Friends tost = new Friends(databaseService);
        // this.databaseService = new UserDetailsServiceImpl();
 
         Firstname.setReadOnly(true);
