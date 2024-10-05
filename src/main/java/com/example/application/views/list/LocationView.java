@@ -2,12 +2,20 @@ package com.example.application.views.list;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
@@ -19,7 +27,7 @@ import java.net.http.HttpResponse;
 
 @PermitAll
 @Route("location")
-public class LocationView extends VerticalLayout {
+public class LocationView extends AppLayout {
 
     private Span latitudeLabel = new Span();
     private Span longitudeLabel = new Span();
@@ -30,27 +38,54 @@ public class LocationView extends VerticalLayout {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public LocationView() {
-        // Set up the UI
+        // Set up the navigation bar
+        createNavBar();
+
+        // Set up the UI components
         Button getLocationButton = new Button("Find Location Automatically", event -> getCurrentLocation());
 
         submitManualLocationButton.addClickListener(event -> handleManualLocation());
-
-//        latitudeLabel.setText("Latitude: Not Available");
-//        longitudeLabel.setText("Longitude: Not Available");
         locationLabel.setText("Location: Not Available");
 
         // Create layout for manual location
         HorizontalLayout manualLocationLayout = new HorizontalLayout();
-        manualLocationLayout.setAlignItems(Alignment.BASELINE); // Align items to baseline
+        manualLocationLayout.setAlignItems(FlexComponent.Alignment.BASELINE); // Align items to baseline
         manualLocationLayout.add(manualLocationField, submitManualLocationButton);
         manualLocationLayout.setSpacing(false); // Remove spacing between items
 
-        // Add components to the main layout
+        // Create a container for displaying the location information
         Div locationContainer = new Div(latitudeLabel, longitudeLabel, locationLabel);
-        //locationContainer.setPadding(false); // Optional: adjust padding as needed
 
-        add(getLocationButton, manualLocationLayout, locationContainer);
-        setSpacing(true); // Add spacing between components if needed
+        // Set main content layout
+        VerticalLayout mainLayout = new VerticalLayout(getLocationButton, manualLocationLayout, locationContainer);
+        setContent(mainLayout);
+    }
+
+    private void createNavBar() {
+        DrawerToggle toggle = new DrawerToggle();
+        H1 title = new H1("Location");
+
+        title.getStyle().set("font-size", "var(--lumo-font-size-l)").set("margin", "0");
+
+        SideNav nav = getSideNav();
+
+        Scroller scroller = new Scroller(nav);
+        addToDrawer(scroller);
+        addToNavbar(toggle, title);
+        setPrimarySection(Section.DRAWER);
+    }
+
+    private SideNav getSideNav() {
+        SideNav nav = new SideNav();
+        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()),
+                new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()),
+                new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
+                new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
+                new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
+                new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
+        return nav;
     }
 
     private void getCurrentLocation() {
@@ -73,10 +108,6 @@ public class LocationView extends VerticalLayout {
                 double latitude = jsonNode.get("latitude").asDouble();
                 double longitude = jsonNode.get("longitude").asDouble();
 
-//                // Update the UI with the location
-//                latitudeLabel.setText("Latitude: " + latitude);
-//                longitudeLabel.setText("Longitude: " + longitude);
-
                 // Get the city and state from the coordinates
                 String location = getCityAndStateFromCoordinates(latitude, longitude);
                 locationLabel.setText("Location: " + location);
@@ -95,7 +126,6 @@ public class LocationView extends VerticalLayout {
         if (manualLocation.isEmpty()) {
             Notification.show("Please enter a valid location.");
         } else {
-            // Process the manual location (this would be where you'd do additional processing)
             Notification.show("Manual location entered: " + manualLocation);
             locationLabel.setText("Location: " + manualLocation);
         }
@@ -118,7 +148,6 @@ public class LocationView extends VerticalLayout {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             // Parse JSON response
-            ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.body());
 
             // Extract city and state
@@ -127,9 +156,7 @@ public class LocationView extends VerticalLayout {
             String state = addressNode.path("state").asText();
 
             // Format result
-            String result = String.format("%s, %s", city.isEmpty() ? "Not Available" : city, state.isEmpty() ? "Not Available" : state);
-
-            return result;
+            return String.format("%s, %s", city.isEmpty() ? "Not Available" : city, state.isEmpty() ? "Not Available" : state);
         } catch (Exception e) {
             e.printStackTrace();
             return "Failed to retrieve address";

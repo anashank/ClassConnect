@@ -89,7 +89,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
                         VaadinIcon.LIST.create()),
                 new SideNavItem("Subjects", "/subjects",
                         VaadinIcon.RECORDS.create()),
-                new SideNavItem("Schedule", "/schedule",
+                new SideNavItem("Groups", "/creategroup",
                         VaadinIcon.CALENDAR.create()),
                 new SideNavItem("Location", "/location",
                         VaadinIcon.LIST.create()),
@@ -109,7 +109,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         Button profileButton = new Button("Profile");
         Button assignmentsButton = new Button("Assignments");
         Button subjectsButton = new Button("Subjects");
-        Button scheduleButton = new Button("Schedule");
+        Button scheduleButton = new Button("Study Groups");
 
         locationButton.addClassName("top-button");
         friendsButton.addClassName("top-button");

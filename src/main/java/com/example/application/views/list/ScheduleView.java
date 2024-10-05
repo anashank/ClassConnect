@@ -2,14 +2,21 @@ package com.example.application.views.list;
 
 import com.example.application.repositories.GroupRepository;
 import com.example.application.services.UserDetailsServiceImpl;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
 import org.vaadin.stefan.fullcalendar.CalendarViewImpl;
@@ -23,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @PermitAll
-@Route("schedule")
-public class ScheduleView extends VerticalLayout {
+@Route("creategroup")
+public class ScheduleView extends AppLayout {
     private UserDetailsServiceImpl databaseService;
     private GroupRepository groupRepository;
     private List<UserForm> allusers;
@@ -44,7 +51,7 @@ public class ScheduleView extends VerticalLayout {
         this.groupRepository = groupRepository;
         allusers = this.databaseService.findAllUsers();
 
-        H2 title = new H2("Schedule Group");
+        H2 title = new H2("Create Study Group");
 
         // Initialize public/private view options
         publicViewComboBox.setItems("Public", "Private");
@@ -53,28 +60,58 @@ public class ScheduleView extends VerticalLayout {
         Button addUserButton = new Button("Add User", event -> openUserDialog());
         Button createGroupButton = new Button("Create Group", event -> createGroup());
 
-        FullCalendar calendar = FullCalendarBuilder.create().build();
-        calendar.setWidth("700px");
-        calendar.setHeight("500px");
-        calendar.changeView(CalendarViewImpl.DAY_GRID_MONTH);
-        calendar.addClassName("full-calendar");
+//        FullCalendar calendar = FullCalendarBuilder.create().build();
+//        calendar.setWidth("700px");
+//        calendar.setHeight("500px");
+//        calendar.changeView(CalendarViewImpl.DAY_GRID_MONTH);
+//        calendar.addClassName("full-calendar");
 
-        Entry entry = new Entry();
-        entry.setTitle("Sample Event");
-        entry.setStart(LocalDate.of(2024, 8, 11));
-        entry.setEnd(LocalDate.of(2024, 8, 12));
+//        Entry entry = new Entry();
+//        entry.setTitle("Sample Event");
+//        entry.setStart(LocalDate.of(2024, 8, 11));
+//        entry.setEnd(LocalDate.of(2024, 8, 12));
+//
+//        InMemoryEntryProvider<Entry> entryProvider = new InMemoryEntryProvider<>();
+//        calendar.setEntryProvider(entryProvider);
+//        entryProvider.addEntry(entry);
+//        calendar.setSizeFull();
 
-        InMemoryEntryProvider<Entry> entryProvider = new InMemoryEntryProvider<>();
-        calendar.setEntryProvider(entryProvider);
-        entryProvider.addEntry(entry);
-        calendar.setSizeFull();
+//        VerticalLayout calendarContainer = new VerticalLayout(calendar);
+//        calendarContainer.setWidth("700px");
+//        calendarContainer.setHeight("500px");
+//        calendarContainer.getStyle().set("border", "1px solid #ccc");
 
-        VerticalLayout calendarContainer = new VerticalLayout(calendar);
-        calendarContainer.setWidth("700px");
-        calendarContainer.setHeight("500px");
-        calendarContainer.getStyle().set("border", "1px solid #ccc");
+        // Create the layout for the view
+        createNavBar();
+        VerticalLayout contentLayout = new VerticalLayout(title, groupNameField, subjectField, publicViewComboBox, datePicker, timeField, addUserButton, userListLayout, createGroupButton);
+//        VerticalLayout contentLayout = new VerticalLayout(title, groupNameField, subjectField, publicViewComboBox, datePicker, timeField, addUserButton, userListLayout, createGroupButton, calendarContainer);
+        setContent(contentLayout);
+    }
 
-        add(title, groupNameField, subjectField, publicViewComboBox, datePicker, timeField, addUserButton, userListLayout, createGroupButton, calendarContainer);
+    private void createNavBar() {
+        DrawerToggle toggle = new DrawerToggle();
+        H2 title = new H2("Study Groups");
+
+        title.getStyle().set("font-size", "var(--lumo-font-size-l)").set("margin", "0");
+
+        SideNav nav = getSideNav();
+        Scroller scroller = new Scroller(nav);
+        addToDrawer(scroller);
+        addToNavbar(toggle, title);
+        setPrimarySection(Section.DRAWER);
+    }
+
+    private SideNav getSideNav() {
+        SideNav nav = new SideNav();
+        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()),
+                new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()),
+                new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
+                new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
+                new SideNavItem("Groups", "/create-group", VaadinIcon.CALENDAR.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
+                new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
+        return nav;
     }
 
     private void openUserDialog() {
