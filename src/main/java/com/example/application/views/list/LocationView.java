@@ -1,5 +1,9 @@
 package com.example.application.views.list;
 
+import com.example.application.views.list.Profile;
+import com.example.application.repositories.ProfileRepository;
+import com.example.application.repositories.UserRepository;
+import com.example.application.views.list.UserForm;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -19,23 +23,35 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import jakarta.annotation.security.PermitAll;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Optional;
 
 @PermitAll
 @Route("location")
 public class LocationView extends AppLayout {
 
-    private Span latitudeLabel = new Span();
-    private Span longitudeLabel = new Span();
-    private Span locationLabel = new Span();
-    private TextField manualLocationField = new TextField("Enter Location Manually");
-    private Button submitManualLocationButton = new Button("Submit Manual Location");
+    private final Span latitudeLabel = new Span();
+    private final Span longitudeLabel = new Span();
+    private final Span locationLabel = new Span();
+    private final TextField manualLocationField = new TextField("Enter Location Manually");
+    private final Button submitManualLocationButton = new Button("Submit Manual Location");
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    private ProfileRepository profileRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public LocationView() {
         // Set up the navigation bar
@@ -49,12 +65,13 @@ public class LocationView extends AppLayout {
 
         // Create layout for manual location
         HorizontalLayout manualLocationLayout = new HorizontalLayout();
-        manualLocationLayout.setAlignItems(FlexComponent.Alignment.BASELINE); // Align items to baseline
+        manualLocationLayout.setAlignItems(FlexComponent.Alignment.BASELINE);
         manualLocationLayout.add(manualLocationField, submitManualLocationButton);
-        manualLocationLayout.setSpacing(false); // Remove spacing between items
+        manualLocationLayout.setSpacing(false);
 
         // Create a container for displaying the location information
-        Div locationContainer = new Div(latitudeLabel, longitudeLabel, locationLabel);
+       // Div locationContainer = new Div(latitudeLabel, longitudeLabel, locationLabel);
+        Div locationContainer = new Div(locationLabel);
 
         // Set main content layout
         VerticalLayout mainLayout = new VerticalLayout(getLocationButton, manualLocationLayout, locationContainer);
@@ -82,7 +99,7 @@ public class LocationView extends AppLayout {
                 new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
                 new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
                 new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()),
-                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LOCATION_ARROW.create()),
                 new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
                 new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
         return nav;
@@ -103,14 +120,22 @@ public class LocationView extends AppLayout {
                         "});"
         ).then(result -> {
             try {
-                // Parse result to JsonNode using Jackson
                 JsonNode jsonNode = objectMapper.readTree(result.asString());
                 double latitude = jsonNode.get("latitude").asDouble();
                 double longitude = jsonNode.get("longitude").asDouble();
 
-                // Get the city and state from the coordinates
+                latitudeLabel.setText("Latitude: " + latitude);
+                longitudeLabel.setText("Longitude: " + longitude);
+
                 String location = getCityAndStateFromCoordinates(latitude, longitude);
                 locationLabel.setText("Location: " + location);
+
+                String[] parts = location.split(", ");
+                if (parts.length == 2) {
+                    String city = parts[0];
+                    String state = parts[1];
+                    saveLocationToProfile(city, state); // Save location to profile
+                }
 
                 Notification.show("Location retrieved successfully");
             } catch (Exception e) {
@@ -120,42 +145,78 @@ public class LocationView extends AppLayout {
     }
 
     private void handleManualLocation() {
-        // Get the user input for manual location
         String manualLocation = manualLocationField.getValue();
 
         if (manualLocation.isEmpty()) {
             Notification.show("Please enter a valid location.");
         } else {
-            Notification.show("Manual location entered: " + manualLocation);
             locationLabel.setText("Location: " + manualLocation);
+
+            String[] parts = manualLocation.split(", ");
+            if (parts.length == 2) {
+                String city = parts[0].trim();
+                String state = parts[1].trim();
+                saveLocationToProfile(city, state); // Save location to profile
+            } else {
+                Notification.show("Please enter a valid format: City, State.");
+            }
         }
     }
 
+    private void saveLocationToProfile(String city, String state) {
+        UserForm currentUser = getCurrentUser();
+
+        if (currentUser != null) {
+            Optional<Profile> profileOpt = profileRepository.findByUser(currentUser);
+            if (profileOpt.isPresent()) {
+                Profile profile = profileOpt.get();
+                profile.setCity(city);
+                profile.setState(state);
+                profileRepository.save(profile); // Save updated profile
+                Notification.show("Location saved to profile.");
+            } else {
+                Notification.show("Profile not found for the user.");
+            }
+        } else {
+            Notification.show("User not logged in.");
+        }
+    }
+
+    private UserForm getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            System.out.println("Authentication is not null");
+            System.out.println("Principal: " + authentication.getPrincipal());
+            if (authentication.getPrincipal() instanceof User) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                String username = userDetails.getUsername();
+                UserForm userformobj = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+                return(userformobj);
+            }
+        }
+        System.out.println("Authentication is null or principal is not UserForm");
+        return null;
+    }
+
+
     private String getCityAndStateFromCoordinates(double latitude, double longitude) {
         try {
-            // Construct the URL for Nominatim API
             String urlString = String.format("https://nominatim.openstreetmap.org/reverse?lat=%f&lon=%f&format=json&addressdetails=1", latitude, longitude);
             URI uri = new URI(urlString);
 
-            // Create HttpClient and HttpRequest
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(uri)
                     .GET()
                     .build();
 
-            // Send request and get response
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // Parse JSON response
             JsonNode jsonNode = objectMapper.readTree(response.body());
 
-            // Extract city and state
             JsonNode addressNode = jsonNode.path("address");
             String city = addressNode.path("city").asText();
             String state = addressNode.path("state").asText();
 
-            // Format result
             return String.format("%s, %s", city.isEmpty() ? "Not Available" : city, state.isEmpty() ? "Not Available" : state);
         } catch (Exception e) {
             e.printStackTrace();
