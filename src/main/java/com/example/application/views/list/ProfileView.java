@@ -107,16 +107,18 @@ public class ProfileView extends AppLayout {
         TextField emailField = new TextField("Email");
         TextField schoolField = new TextField("School");
         ComboBox<String> gradeComboBox = new ComboBox<>("Select Grade");
+        TextField city = new TextField("City");
+        TextField state = new TextField("State");
         gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
 
-        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city,state);
 
         Button saveButton = new Button("Save Profile", event -> {
-            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city, state);
             Notification.show("Profile saved");
         });
 
-        return new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, saveButton);
+        return new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, city,state, saveButton);
     }
 
     private VerticalLayout createScheduleLayout() {
@@ -160,13 +162,15 @@ public class ProfileView extends AppLayout {
         return deleteButton;
     }
 
-    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox, TextField city, TextField state) {
         profileRepository.findByUser(currentUser).ifPresent(profile -> {
             firstNameField.setValue(profile.getFirstName());
             lastNameField.setValue(profile.getLastName());
             emailField.setValue(profile.getEmail());
             schoolField.setValue(profile.getSchool());
             gradeComboBox.setValue(profile.getGrade());
+            city.setValue(profile.getCity());
+            state.setValue(profile.getState());
         });
     }
 
@@ -192,13 +196,15 @@ public class ProfileView extends AppLayout {
         loadSchedulesForUser(currentUser);
     }
 
-    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox,TextField city, TextField state) {
         Profile profile = profileRepository.findByUser(currentUser).orElse(new Profile());
         profile.setFirstName(firstNameField.getValue());
         profile.setLastName(lastNameField.getValue());
         profile.setEmail(emailField.getValue());
         profile.setSchool(schoolField.getValue());
         profile.setGrade(gradeComboBox.getValue());
+        profile.setCity(city.getValue());
+        profile.setState(state.getValue());
         profile.setUser(currentUser);
 
         profileRepository.save(profile);
