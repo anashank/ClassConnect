@@ -113,7 +113,7 @@ public class ProfileView extends VerticalLayout {
             lastNameField.setValue(profile.getLastName());
             emailField.setValue(profile.getEmail());
             schoolField.setValue(profile.getSchool());
-            gradeComboBox.setValue(profile.getGrade());
+            gradeComboBox.setValue("" + profile.getGrade());
         });
     }
 
@@ -150,7 +150,7 @@ public class ProfileView extends VerticalLayout {
         profile.setLastName(lastNameField.getValue());
         profile.setEmail(emailField.getValue());
         profile.setSchool(schoolField.getValue());
-        profile.setGrade(gradeComboBox.getValue());
+        profile.setGrade(Integer.parseInt(gradeComboBox.getValue()));
         profile.setUser(currentUser);
 
         profileRepository.save(profile);
