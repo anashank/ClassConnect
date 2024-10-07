@@ -17,7 +17,7 @@ public class Profile {
     private String lastName;
 
     @Column(nullable = true)
-    private int grade;
+    private String grade;
 
     @Column(nullable = true)
     private String email;
@@ -45,8 +45,8 @@ public class Profile {
     public void setFirstName(String firstName) { this.firstName = firstName; }
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
-    public int getGrade() { return grade; }
-    public void setGrade(int grade) { this.grade = grade; }
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getSchool() { return school; }

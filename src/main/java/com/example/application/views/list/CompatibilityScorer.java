@@ -18,6 +18,7 @@ public class CompatibilityScorer {
     public List<Schedule> getSchedulesByUserId(Long userId) {
         return scheduleRepository.findAllByUserId(userId);
     }
+
     public Profile getProfileById(Long profileId) {
         return profileRepository.findById(profileId).orElseThrow();
     }
@@ -47,13 +48,20 @@ public class CompatibilityScorer {
     public static int scoreProfileCompatibility(Profile profile1, Profile profile2) {
         int score = 0;
 
-        if (profile1.getGrade() == profile2.getGrade() && profile1.getSchool().equals(profile2.getSchool())) {
+        if (profile1.getGrade().equals(profile2.getGrade()) && profile1.getSchool().equals(profile2.getSchool())) {
             score += 50;
         } else if (profile1.getSchool().equals(profile2.getSchool())) {
             score += 20;
-        } else if (profile1.getGrade() == profile2.getGrade()) {
+        } else if (profile1.getGrade().equals(profile2.getGrade())) {
             score += 20;
         }
+
+        if (profile1.getCity().equals(profile2.getCity()) && profile2.getState().equals(profile2.getState())) {
+            score += 20;
+        }
+
+        // then implement logic for looping through all other users,
+        // checking scores, and recommends the top two scoring options
 
         return score;
     }
