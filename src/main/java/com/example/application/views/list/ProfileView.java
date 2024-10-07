@@ -1,12 +1,22 @@
 package com.example.application.views.list;
 
+import com.example.application.repositories.GroupRepository;
 import com.example.application.repositories.ProfileRepository;
 import com.example.application.repositories.ScheduleRepository;
 import com.example.application.services.UserService;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.sidenav.SideNav;
+import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.grid.Grid;
@@ -17,27 +27,28 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 @PermitAll
 @Route("profile")
-public class ProfileView extends VerticalLayout {
+public class ProfileView extends AppLayout {
 
     private final ScheduleRepository scheduleRepository;
     private final ProfileRepository profileRepository;
+    private final GroupRepository groupRepository;
     private final UserService userService;
     private final UserForm currentUser;
 
     // Grid for displaying study groups and schedules
-    private final Grid<StudyGroup> studyGroupGrid = new Grid<>(StudyGroup.class);
+    private final Grid<Groups> studyGroupGrid = new Grid<>(Groups.class);
     private final Grid<Schedule> scheduleGrid = new Grid<>(Schedule.class);
 
     @Autowired
-    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository, UserService userService) {
+    public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository,
+                       GroupRepository groupRepository, UserService userService) {
         this.scheduleRepository = scheduleRepository;
         this.profileRepository = profileRepository;
+        this.groupRepository = groupRepository;
         this.userService = userService;
 
         // Get the currently logged-in user
@@ -48,53 +59,97 @@ public class ProfileView extends VerticalLayout {
         // Use userService to get the current user with joined groups
         currentUser = userService.getUserWithJoinedGroups(username);
 
-        // Initialize profile form components
+        // Set up the UI components
+        createContent();
+        createNavBar();
+    }
+
+    private void createNavBar() {
+        DrawerToggle toggle = new DrawerToggle();
+        H1 title = new H1("Profile");
+
+        title.getStyle().set("font-size", "var(--lumo-font-size-l)").set("margin", "0");
+
+        SideNav nav = getSideNav();
+
+        Scroller scroller = new Scroller(nav);
+        addToDrawer(scroller);
+        addToNavbar(toggle, title);
+        setPrimarySection(Section.DRAWER);
+    }
+
+    private SideNav getSideNav() {
+        SideNav nav = new SideNav();
+        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()),
+                new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()),
+                new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
+                new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
+                new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
+                new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
+        return nav;
+    }
+
+    private void createContent() {
+        VerticalLayout profileLayout = createProfileLayout();
+        VerticalLayout scheduleLayout = createScheduleLayout();
+        VerticalLayout studyGroupLayout = createStudyGroupLayout();
+
+        // Set main content layout
+        VerticalLayout mainLayout = new VerticalLayout(profileLayout, scheduleLayout, studyGroupLayout);
+        setContent(mainLayout);
+    }
+
+    private VerticalLayout createProfileLayout() {
         TextField firstNameField = new TextField("First Name");
         TextField lastNameField = new TextField("Last Name");
         TextField emailField = new TextField("Email");
         TextField schoolField = new TextField("School");
         ComboBox<String> gradeComboBox = new ComboBox<>("Select Grade");
+        TextField city = new TextField("City");
+        TextField state = new TextField("State");
         gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
 
-        // Load existing profile
-        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city,state);
 
-        // Submit button for profile
         Button saveButton = new Button("Save Profile", event -> {
-            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city, state);
             Notification.show("Profile saved");
         });
 
-        // Initialize schedule grid
+        return new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, city,state, saveButton);
+    }
+
+    private VerticalLayout createScheduleLayout() {
         setupScheduleGrid();
 
-        // Form components for adding a new schedule
         TextField classNameField = new TextField("Class Name");
         TextField teacherNameField = new TextField("Teacher Name");
         IntegerField periodField = new IntegerField("Period");
 
-        // Submit button for schedule
         Button addScheduleButton = new Button("Add Schedule", event -> {
             addSchedule(classNameField, teacherNameField, periodField);
             clearScheduleForm(classNameField, teacherNameField, periodField);
         });
 
-        // Initialize study group grid
+        return new VerticalLayout(classNameField, teacherNameField, periodField, addScheduleButton, scheduleGrid);
+    }
+
+    private VerticalLayout createStudyGroupLayout() {
         setupStudyGroupGrid();
-
-        // Layouts
-        VerticalLayout profileLayout = new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, saveButton);
-        VerticalLayout scheduleLayout = new VerticalLayout(classNameField, teacherNameField, periodField, addScheduleButton, scheduleGrid);
-        VerticalLayout studyGroupLayout = new VerticalLayout(studyGroupGrid);
-
-        add(profileLayout, scheduleLayout, studyGroupLayout);
+        return new VerticalLayout(studyGroupGrid);
     }
 
     private void setupScheduleGrid() {
         scheduleGrid.setColumns("className", "teacherName", "period");
-        scheduleGrid.addComponentColumn(schedule -> createDeleteButton(schedule))
-                .setHeader("Actions");
+        scheduleGrid.addComponentColumn(this::createDeleteButton).setHeader("Actions");
         loadSchedulesForUser(currentUser);
+    }
+
+    private void setupStudyGroupGrid() {
+        studyGroupGrid.setColumns("groupName", "subject", "date", "time");
+        loadJoinedStudyGroups();
     }
 
     private Button createDeleteButton(Schedule schedule) {
@@ -107,13 +162,15 @@ public class ProfileView extends VerticalLayout {
         return deleteButton;
     }
 
-    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox, TextField city, TextField state) {
         profileRepository.findByUser(currentUser).ifPresent(profile -> {
             firstNameField.setValue(profile.getFirstName());
             lastNameField.setValue(profile.getLastName());
             emailField.setValue(profile.getEmail());
             schoolField.setValue(profile.getSchool());
-            gradeComboBox.setValue("" + profile.getGrade());
+            gradeComboBox.setValue(profile.getGrade());
+            city.setValue(profile.getCity());
+            state.setValue(profile.getState());
         });
     }
 
@@ -122,14 +179,9 @@ public class ProfileView extends VerticalLayout {
         scheduleGrid.setItems(schedules);
     }
 
-    private void setupStudyGroupGrid() {
-        studyGroupGrid.setColumns("name", "subject", "date");
-        loadJoinedStudyGroups();
-    }
-
     private void loadJoinedStudyGroups() {
-        Set<StudyGroup> joinedGroupsSet = currentUser.getJoinedGroups();
-        studyGroupGrid.setItems(new ArrayList<>(joinedGroupsSet)); // Convert Set to List and set items in the grid
+        List<Groups> joinedGroups = groupRepository.findByUsernamesContaining(currentUser.getUsername());
+        studyGroupGrid.setItems(joinedGroups);
     }
 
     private void addSchedule(TextField classNameField, TextField teacherNameField, IntegerField periodField) {
@@ -144,13 +196,15 @@ public class ProfileView extends VerticalLayout {
         loadSchedulesForUser(currentUser);
     }
 
-    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
+    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox,TextField city, TextField state) {
         Profile profile = profileRepository.findByUser(currentUser).orElse(new Profile());
         profile.setFirstName(firstNameField.getValue());
         profile.setLastName(lastNameField.getValue());
         profile.setEmail(emailField.getValue());
         profile.setSchool(schoolField.getValue());
-        profile.setGrade(Integer.parseInt(gradeComboBox.getValue()));
+        profile.setGrade(gradeComboBox.getValue());
+        profile.setCity(city.getValue());
+        profile.setState(state.getValue());
         profile.setUser(currentUser);
 
         profileRepository.save(profile);

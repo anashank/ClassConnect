@@ -1,158 +1,159 @@
 package com.example.application.views.list;
 
+import com.example.application.repositories.GroupRepository;
+import com.example.application.services.UserDetailsServiceImpl;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.lumo.LumoUtility;
 import jakarta.annotation.security.PermitAll;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.vaadin.stefan.fullcalendar.CalendarViewImpl;
 import org.vaadin.stefan.fullcalendar.Entry;
 import org.vaadin.stefan.fullcalendar.FullCalendar;
 import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
 import org.vaadin.stefan.fullcalendar.dataprovider.InMemoryEntryProvider;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @PermitAll
-@Route("schedule")
+@Route("creategroup")
 public class ScheduleView extends AppLayout {
-    private VerticalLayout contentLayout = new VerticalLayout();
+    private UserDetailsServiceImpl databaseService;
+    private GroupRepository groupRepository;
+    private List<UserForm> allusers;
 
-    public ScheduleView() {
+    // Fields for group creation
+    private TextField groupNameField = new TextField("Group Name");
+    private TextField subjectField = new TextField("Subject");
+    private ComboBox<String> publicViewComboBox = new ComboBox<>("Group Visibility");
+    private DatePicker datePicker = new DatePicker("Select Date");
+    private TextField timeField = new TextField("Select Time");
+
+    private VerticalLayout userListLayout = new VerticalLayout();
+    private List<UserForm> selectedUsers = new ArrayList<>();
+
+    public ScheduleView(UserDetailsServiceImpl databaseService, GroupRepository groupRepository) {
+        this.databaseService = databaseService;
+        this.groupRepository = groupRepository;
+        allusers = this.databaseService.findAllUsers();
+
+        H2 title = new H2("Create Study Group");
+
+        // Initialize public/private view options
+        publicViewComboBox.setItems("Public", "Private");
+        publicViewComboBox.setPlaceholder("Select Visibility");
+
+        Button addUserButton = new Button("Add User", event -> openUserDialog());
+        Button createGroupButton = new Button("Create Group", event -> createGroup());
+
+//        FullCalendar calendar = FullCalendarBuilder.create().build();
+//        calendar.setWidth("700px");
+//        calendar.setHeight("500px");
+//        calendar.changeView(CalendarViewImpl.DAY_GRID_MONTH);
+//        calendar.addClassName("full-calendar");
+
+//        Entry entry = new Entry();
+//        entry.setTitle("Sample Event");
+//        entry.setStart(LocalDate.of(2024, 8, 11));
+//        entry.setEnd(LocalDate.of(2024, 8, 12));
+//
+//        InMemoryEntryProvider<Entry> entryProvider = new InMemoryEntryProvider<>();
+//        calendar.setEntryProvider(entryProvider);
+//        entryProvider.addEntry(entry);
+//        calendar.setSizeFull();
+
+//        VerticalLayout calendarContainer = new VerticalLayout(calendar);
+//        calendarContainer.setWidth("700px");
+//        calendarContainer.setHeight("500px");
+//        calendarContainer.getStyle().set("border", "1px solid #ccc");
+
+        // Create the layout for the view
+        createNavBar();
+        VerticalLayout contentLayout = new VerticalLayout(title, groupNameField, subjectField, publicViewComboBox, datePicker, timeField, addUserButton, userListLayout, createGroupButton);
+//        VerticalLayout contentLayout = new VerticalLayout(title, groupNameField, subjectField, publicViewComboBox, datePicker, timeField, addUserButton, userListLayout, createGroupButton, calendarContainer);
+        setContent(contentLayout);
+    }
+
+    private void createNavBar() {
         DrawerToggle toggle = new DrawerToggle();
-        H1 title = new H1("Schedule");
-        TextField loggedInUser = addLoggedInUser();
-        Button logoutButton = addLogoutButton();
-        loggedInUser.getStyle().set("margin-left", "auto");
-        logoutButton.getStyle().set("margin-left", "auto");
+        H2 title = new H2("Study Groups");
+
+        title.getStyle().set("font-size", "var(--lumo-font-size-l)").set("margin", "0");
 
         SideNav nav = getSideNav();
         Scroller scroller = new Scroller(nav);
-        scroller.setClassName(LumoUtility.Padding.SMALL);
-
-        // Add to layout
         addToDrawer(scroller);
-        addToNavbar(toggle, title, loggedInUser, logoutButton);
-
-        createSchedConnect();
-
-        setContent(contentLayout);
-
-    }
-    private TextField addLoggedInUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserName = authentication.getName();
-        TextField loggedInUser = new TextField("Logged in as:");
-        loggedInUser.setValue(currentUserName);
-        loggedInUser.setReadOnly(true);
-        return loggedInUser;
-    }
-    private Button addLogoutButton() {
-        Button logoutButton = new Button("Log Out", event -> {
-            VaadinSession.getCurrent().getSession().invalidate();
-            getUI().ifPresent(ui -> ui.getPage().setLocation("/login"));
-        });
-        return logoutButton;
+        addToNavbar(toggle, title);
+        setPrimarySection(Section.DRAWER);
     }
 
-    // Navigation drawer items
     private SideNav getSideNav() {
         SideNav nav = new SideNav();
-        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()));
-        nav.addItem(new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()));
-        nav.addItem(new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()));
-        nav.addItem(new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()));
-        nav.addItem(new SideNavItem("Schedule", "/schedule", VaadinIcon.CALENDAR.create()));
-        nav.addItem(new SideNavItem("Location", "/location", VaadinIcon.MAP_MARKER.create()));
-        nav.addItem(new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()));
-        nav.addItem(new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
+        nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()),
+                new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()),
+                new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
+                new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
+                new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
+                new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
         return nav;
     }
 
-    private void createSchedConnect() {
-        DatePicker datePicker = new DatePicker("Select Date");
-        TextField timeField = new TextField("Select Time (HH:MM)");
-        TextField eventNameField = new TextField("Event Name");
+    private void openUserDialog() {
+        Dialog userDialog = new Dialog();
+        TextField usernameField = new TextField("Username");
 
-        // Creating the calendar
-        FullCalendar calendar = FullCalendarBuilder.create().build();
-        calendar.setWidth("90vw");
-        calendar.setHeight("70vh");
-
-        // Customize the calendar
-        calendar.getElement().executeJs("this.calendar.setOption('locale', 'en');"); // Set locale to English
-        calendar.getElement().executeJs(
-                "this.calendar.setOption('dayHeaderFormat', { weekday: 'long' });" + // Long format for weekdays
-                        "this.calendar.setOption('titleFormat', { year: 'numeric', month: 'long' });" + // Long format for months in title
-                        "this.calendar.setOption('weekNumbers', false);" + // Hide week numbers
-                        "this.calendar.setOption('dayCellContent', function(date, cell) { " +
-                        "   cell.innerHTML = '<div style=\"text-align: left; padding: 2px;\">' + date.day + '</div>'; " +
-                        "});" + // Position the dates in the top-left corner
-                        "this.calendar.setOption('headerToolbar', {" +
-                        "   left: 'prev,next today'," +
-                        "   center: 'title'," +
-                        "   right: 'dayGridMonth'" +
-                        "});" // Enable month switching and display the month title above the calendar
-        );
-
-        // Initialize the entry provider
-        InMemoryEntryProvider<Entry> entryProvider = new InMemoryEntryProvider<>();
-        calendar.setEntryProvider(entryProvider);
-
-        // Adding a sample event
-        Entry sampleEntry = new Entry();
-        sampleEntry.setTitle("Sample Event");
-        sampleEntry.setStart(LocalDate.of(2024, 8, 11).atStartOfDay());
-        sampleEntry.setEnd(LocalDate.of(2024, 8, 12).atStartOfDay());
-        entryProvider.addEntry(sampleEntry);
-
-        // Button to submit the new event
-        Button submitButton = new Button("Submit", event -> {
-            LocalDate selectedDate = datePicker.getValue();
-            String selectedTime = timeField.getValue();
-            String eventName = eventNameField.getValue();
-
-            try {
-                LocalTime time = LocalTime.parse(selectedTime);
-                LocalDateTime startDateTime = LocalDateTime.of(selectedDate, time);
-
-                Entry newEntry = new Entry();
-                newEntry.setTitle(eventName);
-                newEntry.setStart(startDateTime);
-                newEntry.setEnd(startDateTime.plusHours(1)); // Adjust duration as needed
-
-                entryProvider.addEntry(newEntry); // Add the new entry to the calendar
-
-            } catch (Exception e) {
-                timeField.setInvalid(true);
-                timeField.setErrorMessage("Invalid time format. Please use HH:MM.");
+        Button confirmButton = new Button("Add User", event -> {
+            String username = usernameField.getValue();
+            UserForm user = loadUserByUsername(username);
+            if (user != null) {
+                selectedUsers.add(user);
+                userListLayout.add(new Button(username)); // Show added username
+                usernameField.clear(); // Clear input field after adding
+            } else {
+                Notification.show("User " + username + " not found!", 3000, Notification.Position.MIDDLE);
             }
         });
 
-        // Add the components to the layout
-        VerticalLayout calendarContainer = new VerticalLayout(calendar);
-        calendarContainer.setWidth("90vw");
-        calendarContainer.setHeight("70vh");
+        Button cancelButton = new Button("Cancel", event -> userDialog.close());
 
-        calendarContainer.addClassName("calendar-container");
-
-
-        contentLayout.add(calendarContainer, datePicker, timeField, eventNameField, submitButton);
-    }
+        userDialog.add(usernameField, confirmButton, cancelButton);
+        userDialog.open();
     }
 
+    private void createGroup() {
+        if (selectedUsers.isEmpty()) {
+            Notification.show("No users added to the group!", 3000, Notification.Position.MIDDLE);
+            return;
+        }
 
-    // Creating the input fields
+        boolean isPublic = "Public".equals(publicViewComboBox.getValue());
+        Groups newGroup = new Groups(selectedUsers, isPublic, groupNameField.getValue(), subjectField.getValue(), datePicker.getValue().toString(), timeField.getValue());
+        groupRepository.save(newGroup); // Save the group to the database
+        Notification.show("Group created with users!", 3000, Notification.Position.MIDDLE);
+    }
+
+    public UserForm loadUserByUsername(String username) {
+        for (UserForm user : allusers) {
+            if (user.getUsername().equals(username)) {
+                return user;
+            }
+        }
+        return null;
+    }
+}

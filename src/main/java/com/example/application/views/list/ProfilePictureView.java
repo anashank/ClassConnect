@@ -25,13 +25,8 @@ public class ProfilePictureView extends VerticalLayout {
         upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
 
         // Set up a default image (local or from a URL)
-        String defaultImageUrl = "https://as2.ftcdn.net/v2/jpg/02/15/84/43/1000_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"; // Replace with your default image URL
+        String defaultImageUrl = "https://placekitten.com/200/300"; // Replace with your default image URL
         profilePicture = new Image(defaultImageUrl, "Default Profile Picture");
-
-        Element profilePictureElement = profilePicture.getElement();
-        profilePictureElement.getStyle().set("border-radius", "50%");
-        profilePictureElement.getStyle().set("object-fit", "cover");
-        profilePictureElement.getStyle().set("border", "2px solid #000000");
 
         // Set the size of the profile picture
         profilePicture.setWidth("150px");
@@ -59,7 +54,9 @@ public class ProfilePictureView extends VerticalLayout {
             // Set the Image component's source to the Base64 string
             profilePicture.setSrc("data:image/png;base64," + base64Image);
         });
-
+        Element profilePictureElement = profilePicture.getElement();
+        profilePictureElement.getStyle().set("border-radius", "50%");
+        profilePictureElement.getStyle().set("object-fit", "cover");
 
         // Add the components to the layout
         add(profilePicture);

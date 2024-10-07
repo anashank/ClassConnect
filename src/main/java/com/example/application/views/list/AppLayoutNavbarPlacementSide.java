@@ -89,7 +89,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
                         VaadinIcon.LIST.create()),
                 new SideNavItem("Subjects", "/subjects",
                         VaadinIcon.RECORDS.create()),
-                new SideNavItem("Schedule", "/schedule",
+                new SideNavItem("Groups", "/creategroup",
                         VaadinIcon.CALENDAR.create()),
                 new SideNavItem("Location", "/location",
                         VaadinIcon.LIST.create()),
@@ -109,7 +109,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         Button profileButton = new Button("Profile");
         Button assignmentsButton = new Button("Assignments");
         Button subjectsButton = new Button("Subjects");
-        Button scheduleButton = new Button("Schedule");
+        Button scheduleButton = new Button("Groups");
 
         locationButton.addClassName("top-button");
         friendsButton.addClassName("top-button");
@@ -125,8 +125,8 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         friendsButton.addClickListener(event -> UI.getCurrent().navigate("friends"));
         assignmentsButton.addClickListener(event -> UI.getCurrent().navigate("assignments"));
         profileButton.addClickListener(event -> UI.getCurrent().navigate("profile"));
-        scheduleButton.addClickListener(event -> UI.getCurrent().navigate("schedule"));
-        subjectsButton.addClickListener(event-> UI.getCurrent().navigate("schedule"));
+        scheduleButton.addClickListener(event -> UI.getCurrent().navigate("creategroup"));
+        subjectsButton.addClickListener(event-> UI.getCurrent().navigate("creategroup"));
 
         // Arrange the layout as per the second image
         HorizontalLayout topRow = new HorizontalLayout(locationButton, friendsButton);

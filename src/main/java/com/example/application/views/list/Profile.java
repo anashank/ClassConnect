@@ -25,6 +25,12 @@ public class Profile {
     @Column(nullable = true)
     private String school;
 
+    @Column(nullable = true)
+    private String city;  // New field
+
+    @Column(nullable = true)
+    private String state; // New field
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserForm user; // Link to UserForm
@@ -45,6 +51,10 @@ public class Profile {
     public void setEmail(String email) { this.email = email; }
     public String getSchool() { return school; }
     public void setSchool(String school) { this.school = school; }
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
     public UserForm getUser() { return user; }
     public void setUser(UserForm user) { this.user = user; }
 }

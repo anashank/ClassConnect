@@ -23,6 +23,7 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,9 @@ public class FriendsView extends AppLayout {
     private List<Schedule> scheduleList = new ArrayList<>();
 
     private UserDetailsServiceImpl databaseService;
+    UserForm userform = new UserForm();
+    Profile profile = new Profile();
+
 
     public FriendsView(UserDetailsServiceImpl databaseService) {
         this.databaseService = databaseService;
@@ -90,7 +94,7 @@ public class FriendsView extends AppLayout {
         nav.addItem(new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()));
         nav.addItem(new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()));
         nav.addItem(new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()));
-        nav.addItem(new SideNavItem("Schedule", "/schedule", VaadinIcon.CALENDAR.create()));
+        nav.addItem(new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()));
         nav.addItem(new SideNavItem("Location", "/location", VaadinIcon.MAP_MARKER.create()));
         nav.addItem(new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()));
         nav.addItem(new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
@@ -104,9 +108,11 @@ public class FriendsView extends AppLayout {
         TextField Lastname = new TextField("Last Name");
         EmailField Email = new EmailField("Email");
         TextField school = new TextField("School");
+        //Label username = new Label(userform.getUsername());
         Friendslide test = new Friendslide(databaseService);
         ProfilePictureView test2 = new ProfilePictureView();
-        //        this.databaseService = new UserDetailsServiceImpl();
+        //Friends tost = new Friends(databaseService);
+       // this.databaseService = new UserDetailsServiceImpl();
 
         Firstname.setReadOnly(true);
         Lastname.setReadOnly(true);
