@@ -93,10 +93,10 @@ public class FriendsView extends AppLayout {
         nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()));
         nav.addItem(new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()));
         nav.addItem(new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()));
-        nav.addItem(new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()));
+        nav.addItem(new SideNavItem("Recommendations", "/rec", VaadinIcon.RECORDS.create()));
         nav.addItem(new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()));
         nav.addItem(new SideNavItem("Location", "/location", VaadinIcon.MAP_MARKER.create()));
-        nav.addItem(new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()));
+        nav.addItem(new SideNavItem("Friends", "/friends",VaadinIcon.LOCATION_ARROW.create()));
         nav.addItem(new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
         return nav;
     }

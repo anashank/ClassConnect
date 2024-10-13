@@ -31,6 +31,9 @@ public class Profile {
     @Column(nullable = true)
     private String state; // New field
 
+    @Column(nullable = true)
+    private Integer score;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserForm user; // Link to UserForm
@@ -55,6 +58,9 @@ public class Profile {
     public void setCity(String city) { this.city = city; }
     public String getState() { return state; }
     public void setState(String state) { this.state = state; }
+    // Getter and Setter for score
+    public Integer getScore() { return score; }
+    public void setScore(Integer score) { this.score = score; }
     public UserForm getUser() { return user; }
     public void setUser(UserForm user) { this.user = user; }
 }

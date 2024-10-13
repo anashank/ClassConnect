@@ -106,9 +106,9 @@ public class ScheduleView extends AppLayout {
         nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()),
                 new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()),
                 new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
-                new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
+                new SideNavItem("Recommendations", "/rec", VaadinIcon.RECORDS.create()),
                 new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()),
-                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LOCATION_ARROW.create()),
                 new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
                 new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
         return nav;

@@ -3,6 +3,7 @@ package com.example.application.views.list;
 import com.example.application.repositories.GroupRepository;
 import com.example.application.repositories.ProfileRepository;
 import com.example.application.repositories.ScheduleRepository;
+import com.example.application.repositories.UserMatchRepository;
 import com.example.application.services.UserService;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
@@ -10,6 +11,8 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
@@ -37,6 +40,7 @@ public class ProfileView extends AppLayout {
     private final ProfileRepository profileRepository;
     private final GroupRepository groupRepository;
     private final UserService userService;
+    private final UserMatchRepository userMatchRepository;
     private final UserForm currentUser;
 
     // Grid for displaying study groups and schedules
@@ -45,10 +49,12 @@ public class ProfileView extends AppLayout {
 
     @Autowired
     public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository,
-                       GroupRepository groupRepository, UserService userService) {
+                       GroupRepository groupRepository, UserService userService,
+                       UserMatchRepository userMatchRepository) {
         this.scheduleRepository = scheduleRepository;
         this.profileRepository = profileRepository;
         this.groupRepository = groupRepository;
+        this.userMatchRepository = userMatchRepository;
         this.userService = userService;
 
         // Get the currently logged-in user
@@ -83,9 +89,9 @@ public class ProfileView extends AppLayout {
         nav.addItem(new SideNavItem("Dashboard", "/dashboard", VaadinIcon.DASHBOARD.create()),
                 new SideNavItem("Profile", "/profile", VaadinIcon.USER.create()),
                 new SideNavItem("Assignments", "/assignments", VaadinIcon.LIST.create()),
-                new SideNavItem("Subjects", "/subjects", VaadinIcon.RECORDS.create()),
+                new SideNavItem("Recommendations", "/rec", VaadinIcon.RECORDS.create()),
                 new SideNavItem("Groups", "/creategroup", VaadinIcon.CALENDAR.create()),
-                new SideNavItem("Location", "/location", VaadinIcon.LIST.create()),
+                new SideNavItem("Location", "/location", VaadinIcon.LOCATION_ARROW.create()),
                 new SideNavItem("Friends", "/friends", VaadinIcon.USER_HEART.create()),
                 new SideNavItem("Messages", "/messages", VaadinIcon.MAILBOX.create()));
         return nav;
@@ -95,9 +101,11 @@ public class ProfileView extends AppLayout {
         VerticalLayout profileLayout = createProfileLayout();
         VerticalLayout scheduleLayout = createScheduleLayout();
         VerticalLayout studyGroupLayout = createStudyGroupLayout();
+//        VerticalLayout recommendedPartnersLayout = createRecommendedPartnersLayout();
 
         // Set main content layout
         VerticalLayout mainLayout = new VerticalLayout(profileLayout, scheduleLayout, studyGroupLayout);
+        //VerticalLayout mainLayout = new VerticalLayout(profileLayout, scheduleLayout, studyGroupLayout,recommendedPartnersLayout);
         setContent(mainLayout);
     }
 
@@ -215,4 +223,28 @@ public class ProfileView extends AppLayout {
         teacherNameField.clear();
         periodField.clear();
     }
+
+//    private VerticalLayout createRecommendedPartnersLayout() {
+//        VerticalLayout layout = new VerticalLayout();
+//        layout.setPadding(false);
+//        layout.setSpacing(false);
+//
+//        // Title for the section
+//        H2 title = new H2("Recommended Study Group Partners");
+//        layout.add(title);
+//
+//        // Fetch all user matches for the current user
+//        List<UserMatch> userMatches = userMatchRepository.findByUser(currentUser);
+//
+//        // Create a layout to display the user information
+//        for (UserMatch match : userMatches) {
+//            HorizontalLayout userLayout = new HorizontalLayout();
+//            userLayout.add(new Span("User: " + match.getRecommendedUser().getUsername() + " - Score: " + match.getScore()));
+//            layout.add(userLayout);
+//        }
+//
+//        return layout;
+//    }
+
+
 }

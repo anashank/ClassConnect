@@ -87,12 +87,12 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
                         VaadinIcon.USER.create()),
                 new SideNavItem("Assignments", "/assignments",
                         VaadinIcon.LIST.create()),
-                new SideNavItem("Subjects", "/subjects",
+                new SideNavItem("Recommendations", "/rec",
                         VaadinIcon.RECORDS.create()),
                 new SideNavItem("Groups", "/creategroup",
                         VaadinIcon.CALENDAR.create()),
                 new SideNavItem("Location", "/location",
-                        VaadinIcon.LIST.create()),
+                        VaadinIcon.LOCATION_ARROW.create()),
                 new SideNavItem("Friends", "/friends",
                         VaadinIcon.USER_HEART.create()),
                 new SideNavItem("Messages", "/messages",
@@ -108,7 +108,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         Button friendsButton = new Button("Friends");
         Button profileButton = new Button("Profile");
         Button assignmentsButton = new Button("Assignments");
-        Button subjectsButton = new Button("Subjects");
+        Button subjectsButton = new Button("Recommendations");
         Button scheduleButton = new Button("Groups");
 
         locationButton.addClassName("top-button");
@@ -126,7 +126,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         assignmentsButton.addClickListener(event -> UI.getCurrent().navigate("assignments"));
         profileButton.addClickListener(event -> UI.getCurrent().navigate("profile"));
         scheduleButton.addClickListener(event -> UI.getCurrent().navigate("creategroup"));
-        subjectsButton.addClickListener(event-> UI.getCurrent().navigate("creategroup"));
+        subjectsButton.addClickListener(event-> UI.getCurrent().navigate("rec"));
 
         // Arrange the layout as per the second image
         HorizontalLayout topRow = new HorizontalLayout(locationButton, friendsButton);
