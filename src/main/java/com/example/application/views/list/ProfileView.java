@@ -5,11 +5,15 @@ import com.example.application.repositories.ProfileRepository;
 import com.example.application.repositories.ScheduleRepository;
 import com.example.application.repositories.UserMatchRepository;
 import com.example.application.services.UserService;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.application.repositories.UserRepository;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Span;
@@ -28,9 +32,15 @@ import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Optional;
 
 @PermitAll
 @Route("profile")
@@ -42,10 +52,18 @@ public class ProfileView extends AppLayout {
     private final UserService userService;
     private final UserMatchRepository userMatchRepository;
     private final UserForm currentUser;
+    private final Span latitudeLabel = new Span();
+    private final Span longitudeLabel = new Span();
+    private final Span locationLabel = new Span();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
 
     // Grid for displaying study groups and schedules
     private final Grid<Groups> studyGroupGrid = new Grid<>(Groups.class);
     private final Grid<Schedule> scheduleGrid = new Grid<>(Schedule.class);
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     public ProfileView(ScheduleRepository scheduleRepository, ProfileRepository profileRepository,
@@ -115,18 +133,24 @@ public class ProfileView extends AppLayout {
         TextField emailField = new TextField("Email");
         TextField schoolField = new TextField("School");
         ComboBox<String> gradeComboBox = new ComboBox<>("Select Grade");
-        TextField city = new TextField("City");
-        TextField state = new TextField("State");
+        //TextField city = new TextField("City");
+        //TextField state = new TextField("State");
+        Button getLocationButton = new Button("Find Location Automatically", event -> getCurrentLocation());
         gradeComboBox.setItems("7th Grade", "8th Grade", "9th Grade", "10th Grade", "11th Grade", "12th Grade");
 
-        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city,state);
+        Div locationContainer = new Div(locationLabel);
+
+       // loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city,state);
+        loadProfileData(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
+
 
         Button saveButton = new Button("Save Profile", event -> {
-            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city, state);
+           //saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,city, state);
+            saveProfile(firstNameField, lastNameField, emailField, schoolField, gradeComboBox);
             Notification.show("Profile saved");
         });
 
-        return new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox, city,state, saveButton);
+        return new VerticalLayout(firstNameField, lastNameField, emailField, schoolField, gradeComboBox,getLocationButton, locationContainer, saveButton);
     }
 
     private VerticalLayout createScheduleLayout() {
@@ -160,6 +184,104 @@ public class ProfileView extends AppLayout {
         loadJoinedStudyGroups();
     }
 
+    private void getCurrentLocation() {
+        getUI().ifPresent(ui -> ui.getPage().executeJs(
+                "return new Promise((resolve, reject) => {" +
+                        "    if (navigator.geolocation) {" +
+                        "        navigator.geolocation.getCurrentPosition(position => {" +
+                        "            resolve(JSON.stringify({ latitude: position.coords.latitude, longitude: position.coords.longitude }));" +
+                        "        }, error => {" +
+                        "            reject(error.message);" +
+                        "        });" +
+                        "    } else {" +
+                        "        reject('Geolocation is not supported by this browser.');" +
+                        "    }" +
+                        "});"
+        ).then(result -> {
+            try {
+                JsonNode jsonNode = objectMapper.readTree(result.asString());
+                double latitude = jsonNode.get("latitude").asDouble();
+                double longitude = jsonNode.get("longitude").asDouble();
+
+                latitudeLabel.setText("Latitude: " + latitude);
+                longitudeLabel.setText("Longitude: " + longitude);
+
+                String location = getCityAndStateFromCoordinates(latitude, longitude);
+                locationLabel.setText("Location: " + location);
+
+                String[] parts = location.split(", ");
+                if (parts.length == 2) {
+                    String city = parts[0];
+                    String state = parts[1];
+                    saveLocationToProfile(city, state); // Save location to profile
+                }
+
+                Notification.show("Location retrieved successfully");
+            } catch (Exception e) {
+                Notification.show("Failed to parse location data");
+            }
+        }));
+    }
+
+    private String getCityAndStateFromCoordinates(double latitude, double longitude) {
+        try {
+            String urlString = String.format("https://nominatim.openstreetmap.org/reverse?lat=%f&lon=%f&format=json&addressdetails=1", latitude, longitude);
+            URI uri = new URI(urlString);
+
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(uri)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            JsonNode jsonNode = objectMapper.readTree(response.body());
+
+            JsonNode addressNode = jsonNode.path("address");
+            String city = addressNode.path("city").asText();
+            String state = addressNode.path("state").asText();
+
+            return String.format("%s, %s", city.isEmpty() ? "Not Available" : city, state.isEmpty() ? "Not Available" : state);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Failed to retrieve address";
+        }
+    }
+    private void saveLocationToProfile(String city, String state) {
+        UserForm currentUser = getCurrentUser();
+
+        if (currentUser != null) {
+            Optional<Profile> profileOpt = profileRepository.findByUser(currentUser);
+            if (profileOpt.isPresent()) {
+                Profile profile = profileOpt.get();
+                profile.setCity(city);
+                profile.setState(state);
+                profileRepository.save(profile); // Save updated profile
+                Notification.show("Location saved to profile.");
+            } else {
+                Notification.show("Profile not found for the user.");
+            }
+        } else {
+            Notification.show("User not logged in.");
+        }
+    }
+
+    private UserForm getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            System.out.println("Authentication is not null");
+            System.out.println("Principal: " + authentication.getPrincipal());
+            if (authentication.getPrincipal() instanceof User) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                String username = userDetails.getUsername();
+                UserForm userformobj = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
+                return(userformobj);
+            }
+        }
+        System.out.println("Authentication is null or principal is not UserForm");
+        return null;
+    }
+
     private Button createDeleteButton(Schedule schedule) {
         Button deleteButton = new Button("Delete");
         deleteButton.addClickListener(event -> {
@@ -170,15 +292,25 @@ public class ProfileView extends AppLayout {
         return deleteButton;
     }
 
-    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox, TextField city, TextField state) {
+//   // private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox, TextField city, TextField state) {
+//        profileRepository.findByUser(currentUser).ifPresent(profile -> {
+//            firstNameField.setValue(profile.getFirstName());
+//            lastNameField.setValue(profile.getLastName());
+//            emailField.setValue(profile.getEmail());
+//            schoolField.setValue(profile.getSchool());
+//            gradeComboBox.setValue(profile.getGrade());
+//           // city.setValue(profile.getCity());
+//           // state.setValue(profile.getState());
+//        });
+//    }
+
+    private void loadProfileData(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
         profileRepository.findByUser(currentUser).ifPresent(profile -> {
             firstNameField.setValue(profile.getFirstName());
             lastNameField.setValue(profile.getLastName());
             emailField.setValue(profile.getEmail());
             schoolField.setValue(profile.getSchool());
             gradeComboBox.setValue(profile.getGrade());
-            city.setValue(profile.getCity());
-            state.setValue(profile.getState());
         });
     }
 
@@ -204,15 +336,26 @@ public class ProfileView extends AppLayout {
         loadSchedulesForUser(currentUser);
     }
 
-    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox,TextField city, TextField state) {
+//    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox,TextField city, TextField state) {
+//        Profile profile = profileRepository.findByUser(currentUser).orElse(new Profile());
+//        profile.setFirstName(firstNameField.getValue());
+//        profile.setLastName(lastNameField.getValue());
+//        profile.setEmail(emailField.getValue());
+//        profile.setSchool(schoolField.getValue());
+//        profile.setGrade(gradeComboBox.getValue());
+//        profile.setCity(city.getValue());
+//        profile.setState(state.getValue());
+//        profile.setUser(currentUser);
+//
+//        profileRepository.save(profile);
+//    }
+    private void saveProfile(TextField firstNameField, TextField lastNameField, TextField emailField, TextField schoolField, ComboBox<String> gradeComboBox) {
         Profile profile = profileRepository.findByUser(currentUser).orElse(new Profile());
         profile.setFirstName(firstNameField.getValue());
         profile.setLastName(lastNameField.getValue());
         profile.setEmail(emailField.getValue());
         profile.setSchool(schoolField.getValue());
         profile.setGrade(gradeComboBox.getValue());
-        profile.setCity(city.getValue());
-        profile.setState(state.getValue());
         profile.setUser(currentUser);
 
         profileRepository.save(profile);
