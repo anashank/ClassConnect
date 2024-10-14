@@ -89,7 +89,7 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
                         VaadinIcon.LIST.create()),
                 new SideNavItem("Recommendations", "/rec",
                         VaadinIcon.RECORDS.create()),
-                new SideNavItem("Groups", "/creategroup",
+                new SideNavItem("Groups", "/groups",
                         VaadinIcon.CALENDAR.create()),
                 new SideNavItem("Location", "/location",
                         VaadinIcon.LOCATION_ARROW.create()),
@@ -108,31 +108,35 @@ public class AppLayoutNavbarPlacementSide extends AppLayout {
         Button friendsButton = new Button("Friends");
         Button profileButton = new Button("Profile");
         Button assignmentsButton = new Button("Assignments");
-        Button subjectsButton = new Button("Recommendations");
-        Button scheduleButton = new Button("Groups");
+//        Button subjectsButton = new Button("Recommendations");
+//        Button scheduleButton = new Button("Groups");
+        Button groupButton = new Button("Groups");
 
         locationButton.addClassName("top-button");
         friendsButton.addClassName("top-button");
 
         profileButton.addClassName("huge-middle-button");
         assignmentsButton.addClassName("large-middle-button");
+        groupButton.addClassName("large-middle-button");
 
-        subjectsButton.addClassName("bottom-button");
-        scheduleButton.addClassName("bottom-button");
+
+//        subjectsButton.addClassName("bottom-button");
+//        scheduleButton.addClassName("bottom-button");
 
         // Add click listeners to direct to pages
         locationButton.addClickListener(event -> UI.getCurrent().navigate("location"));
         friendsButton.addClickListener(event -> UI.getCurrent().navigate("friends"));
         assignmentsButton.addClickListener(event -> UI.getCurrent().navigate("assignments"));
         profileButton.addClickListener(event -> UI.getCurrent().navigate("profile"));
-        scheduleButton.addClickListener(event -> UI.getCurrent().navigate("creategroup"));
-        subjectsButton.addClickListener(event-> UI.getCurrent().navigate("rec"));
+//        scheduleButton.addClickListener(event -> UI.getCurrent().navigate("creategroup"));
+//        subjectsButton.addClickListener(event-> UI.getCurrent().navigate("rec"));
+        groupButton.addClickListener(event -> UI.getCurrent().navigate("groups"));
 
         // Arrange the layout as per the second image
         HorizontalLayout topRow = new HorizontalLayout(locationButton, friendsButton);
-        HorizontalLayout bottomRow = new HorizontalLayout(subjectsButton, scheduleButton);
+//        HorizontalLayout bottomRow = new HorizontalLayout(subjectsButton, scheduleButton);
 
-        content.add(topRow, profileButton, assignmentsButton, bottomRow);
+        content.add(topRow, profileButton, assignmentsButton, groupButton);
         setContent(content);
     }
     
