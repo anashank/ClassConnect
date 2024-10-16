@@ -311,6 +311,7 @@ public class ProfileView extends AppLayout {
             emailField.setValue(profile.getEmail());
             schoolField.setValue(profile.getSchool());
             gradeComboBox.setValue(profile.getGrade());
+            locationLabel.setText("Location: " + profile.getCity() + "," + profile.getState());
         });
     }
 
