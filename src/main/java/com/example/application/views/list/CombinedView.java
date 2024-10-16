@@ -77,10 +77,11 @@ public class CombinedView extends AppLayout {
         VerticalLayout matchesLayout = new VerticalLayout();
         if (currentUser != null) {
             List<UserMatch> matches = compatibilityScorer.findBestMatches(currentUser.getId());
-
+            matches.sort((match1, match2) -> Double.compare(match2.getScore(), match1.getScore()));
             // Initialize the grid for displaying matches
             matchGrid = new Grid<>(UserMatch.class);
             matchGrid.setColumns("recommendedUser.username", "score");  // Displaying username and score
+            matchGrid.addColumn(userMatch -> matches.indexOf(userMatch) + 1).setHeader("Rank").setAutoWidth(true);
             matchGrid.setItems(matches);  // Add matches to the grid
 
             if (!matches.isEmpty()) {
